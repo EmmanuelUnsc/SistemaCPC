@@ -3,32 +3,39 @@
 }
 
 <h1>Gestionar avisos</h1>
-<partial name="_SoloPantalla" />
 
 <div class="row g-3 mb-4">
     <div class="col-md-7">
-        <label class="form-label">Título</label>
-        <input class="form-control" value="Asamblea general" />
+        <label class="form-label" for="f-titulo">Título</label>
+        <input class="form-control" id="f-titulo" />
     </div>
     <div class="col-md-4">
-        <label class="form-label">Visible hasta</label>
-        <input type="date" class="form-control" value="2026-10-30" />
+        <label class="form-label" for="f-vence">Visible hasta</label>
+        <input type="date" class="form-control" id="f-vence" />
     </div>
     <div class="col-md-7">
-        <label class="form-label">Mensaje</label>
-        <textarea class="form-control" rows="3">Sábado 9:00, sede del Colegio</textarea>
+        <label class="form-label" for="f-mensaje">Mensaje</label>
+        <textarea class="form-control" rows="3" id="f-mensaje"></textarea>
     </div>
     <div class="col-12">
         <button type="button" class="btn btn-success">Publicar</button>
+        <button type="button" class="btn btn-outline-secondary" data-limpiar>Nuevo aviso</button>
     </div>
 </div>
 
 <h2 class="h6">Avisos vigentes</h2>
 <div class="row">
     <div class="col-md-8">
-        <table class="table table-striped">
+        <table class="table table-striped seleccionable">
             <thead><tr><th>Título</th><th>Vence</th></tr></thead>
-            <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
+            <tbody>
+                <tr data-titulo="Asamblea general" data-vence="2026-10-30" data-mensaje="Sábado 9:00, sede del Colegio">
+                    <td>Asamblea general</td><td>30/10/2026</td>
+                </tr>
+                <tr data-titulo="Pago de aportes" data-vence="2026-11-20" data-mensaje="Recuerden ponerse al día con sus aportes.">
+                    <td>Pago de aportes</td><td>20/11/2026</td>
+                </tr>
+            </tbody>
         </table>
     </div>
     <div class="col-md-4 d-grid gap-2 align-content-start">

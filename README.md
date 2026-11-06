@@ -15,13 +15,9 @@ Proyecto de Sistemas I, Ingeniería de Software y Programación Web III (Univall
 
 Requisitos: SDK de .NET 10 y Docker Desktop (abierto).
 
-**Solo la primera vez**, crear la base de datos (desde esta carpeta):
-
-```
-docker compose up -d
-```
-
-Desde entonces la base arranca sola cada vez que se abre Docker Desktop.
+No hace falta levantar la base a mano: al compilar `SistemaCPC.Api` en Debug se ejecuta
+`docker compose up -d`, que crea o enciende el contenedor de PostgreSQL. Si Docker Desktop está cerrado,
+la compilación muestra una advertencia y la API no podrá conectarse.
 
 ### Con Visual Studio (2022 17.11 o posterior)
 

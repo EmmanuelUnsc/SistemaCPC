@@ -29,3 +29,12 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* Tablas donde se elige una fila con un clic */
+table.seleccionable tbody tr {
+  cursor: pointer;
+}
+
+table.seleccionable tbody tr.seleccionada > * {
+  background-color: #cfe2ff !important;
+  box-shadow: none;
+}

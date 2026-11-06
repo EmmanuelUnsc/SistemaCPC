@@ -4,7 +4,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Que Visual Studio compile siempre este proyecto con F5, para que se ejecute el paso de abajo. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
+
+  <!-- En desarrollo, antes de compilar levanta PostgreSQL (docker-compose.yml de la solución).
+       Si Docker Desktop no está abierto, solo muestra una advertencia. -->
+  <Target Name="LevantarBaseDeDatos" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+    <Exec Command="docker compose -f &quot;$(MSBuildProjectDirectory)\..\docker-compose.yml&quot; up -d"
+          ContinueOnError="true" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />

@@ -3,7 +3,6 @@
 }
 
 <h1>Gestionar pagos</h1>
-<partial name="_SoloPantalla" />
 
 <div class="row g-2 align-items-end mb-3">
     <div class="col-md-4">
@@ -21,33 +20,38 @@
     <div class="col-md-6">
         <div class="row g-2">
             <div class="col-6">
-                <label class="form-label">Número de recibo</label>
-                <input class="form-control" value="R-1022" />
+                <label class="form-label" for="f-recibo">Número de recibo</label>
+                <input class="form-control" id="f-recibo" value="R-1022" />
             </div>
             <div class="col-6">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" value="2026-10-25" />
+                <label class="form-label" for="f-fecha">Fecha</label>
+                <input type="date" class="form-control" id="f-fecha" value="2026-10-25" />
             </div>
             <div class="col-6">
-                <label class="form-label">Monto (Bs)</label>
-                <input class="form-control" value="105" />
+                <label class="form-label" for="f-monto">Monto (Bs)</label>
+                <input class="form-control" id="f-monto" value="105" />
             </div>
             <div class="col-6">
-                <label class="form-label">Meses cubiertos</label>
-                <input class="form-control" value="3" />
+                <label class="form-label" for="f-meses">Meses cubiertos</label>
+                <input class="form-control" id="f-meses" value="3" />
             </div>
             <div class="col-12">
                 <button type="button" class="btn btn-success">Registrar pago</button>
+                <button type="button" class="btn btn-outline-secondary" data-limpiar>Nuevo pago</button>
             </div>
         </div>
     </div>
     <div class="col-md-6">
         <h2 class="h6">Pagos registrados</h2>
-        <table class="table table-sm table-striped">
+        <table class="table table-sm table-striped seleccionable">
             <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th></tr></thead>
             <tbody>
-                <tr><td>R-1021</td><td>05/08/2026</td><td>Bs 105</td></tr>
-                <tr><td>R-0990</td><td>02/05/2026</td><td>Bs 105</td></tr>
+                <tr data-recibo="R-1021" data-fecha="2026-08-05" data-monto="105" data-meses="3">
+                    <td>R-1021</td><td>05/08/2026</td><td>Bs 105</td>
+                </tr>
+                <tr data-recibo="R-0990" data-fecha="2026-05-02" data-monto="105" data-meses="3">
+                    <td>R-0990</td><td>02/05/2026</td><td>Bs 105</td>
+                </tr>
             </tbody>
         </table>
         <button type="button" class="btn btn-outline-primary">Corregir pago</button>
