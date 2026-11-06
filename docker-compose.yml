@@ -1,9 +1,11 @@
 # Base de datos de desarrollo del Sistema CPC.
-# Levantar con: docker compose up -d
+# La primera vez: docker compose up -d
+# Después arranca sola cada vez que se abre Docker Desktop (restart: always).
 services:
   postgres:
     image: postgres:17
     container_name: sistemacpc-db
+    restart: always
     environment:
       POSTGRES_DB: sistemacpc
       POSTGRES_USER: cpc

@@ -15,25 +15,36 @@ Proyecto de Sistemas I, Ingeniería de Software y Programación Web III (Univall
 
 Requisitos: SDK de .NET 10 y Docker Desktop (abierto).
 
-1. Base de datos (desde esta carpeta):
+**Solo la primera vez**, crear la base de datos (desde esta carpeta):
 
-   ```
-   docker compose up -d
-   ```
+```
+docker compose up -d
+```
 
-2. API, en una terminal:
+Desde entonces la base arranca sola cada vez que se abre Docker Desktop.
+
+### Con Visual Studio (2022 17.11 o posterior)
+
+1. Abrir Docker Desktop.
+2. Abrir `SistemaCPC.sln`.
+3. En la barra de arranque, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar F5.
+   Se inician los dos proyectos y se abre http://localhost:5210
+
+### Desde la terminal
+
+1. API, en una terminal:
 
    ```
    dotnet run --project SistemaCPC.Api --launch-profile http
    ```
 
-3. Web, en otra terminal:
+2. Web, en otra terminal:
 
    ```
    dotnet run --project SistemaCPC.Web --launch-profile http
    ```
 
-4. Abrir http://localhost:5210
+3. Abrir http://localhost:5210
 
 Al arrancar, la API crea las tablas y carga los usuarios de prueba si la base está vacía
 (`SistemaCPC.Api/Data/DatosIniciales.cs`).

@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "API + Web",
+    "Projects": [
+      {
+        "Path": "SistemaCPC.Api\\SistemaCPC.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "SistemaCPC.Web\\SistemaCPC.Web.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
+  }
+]
