@@ -15,15 +15,17 @@ Proyecto de Sistemas I, Ingeniería de Software y Programación Web III (Univall
 
 Requisitos: SDK de .NET 10 y Docker Desktop (abierto).
 
-No hace falta levantar la base a mano: al compilar `SistemaCPC.Api` en Debug se ejecuta
-`docker compose up -d`, que crea o enciende el contenedor de PostgreSQL. Si Docker Desktop está cerrado,
-la compilación muestra una advertencia y la API no podrá conectarse.
+**Solo la primera vez**, crear el contenedor de la base de datos (desde esta carpeta):
+
+```
+docker compose up -d
+```
 
 ### Con Visual Studio (2022 17.11 o posterior)
 
-1. Abrir Docker Desktop.
+1. Abrir Docker Desktop y darle Play al contenedor `sistemacpc`.
 2. Abrir `SistemaCPC.sln`.
-3. En la barra de arranque, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar F5.
+3. En la barra de arranque, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar Iniciar.
    Se inician los dos proyectos y se abre http://localhost:5210
 
 ### Desde la terminal
