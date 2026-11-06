@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Afiliados por estado";
+}
+
+<partial name="_Menu" />
+
+<h1>Generar reportes: afiliados por estado</h1>
+<partial name="_SoloPantalla" />
+
+<div class="row g-3 mb-4 text-center">
+    <div class="col-6 col-md-3"><div class="border rounded p-3"><div class="fs-4">312</div>Activos</div></div>
+    <div class="col-6 col-md-3"><div class="border rounded p-3"><div class="fs-4">198</div>Inactivos</div></div>
+    <div class="col-6 col-md-3"><div class="border rounded p-3"><div class="fs-4">16</div>Renunciados</div></div>
+    <div class="col-6 col-md-3"><div class="border rounded p-3"><div class="fs-4">8</div>Fallecidos</div></div>
+</div>
+
+<table class="table table-striped">
+    <thead><tr><th>Registro</th><th>Nombre</th><th>Estado</th><th>Deuda</th></tr></thead>
+    <tbody>
+        <tr><td>0457</td><td>Nombre Apellido</td><td>Activo</td><td>Bs 105</td></tr>
+        <tr><td>0458</td><td>Nombre Apellido</td><td>Inactivo</td><td>Bs 420</td></tr>
+    </tbody>
+</table>

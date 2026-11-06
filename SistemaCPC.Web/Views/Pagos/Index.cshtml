@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "Gestionar pagos";
+}
+
+<h1>Gestionar pagos</h1>
+<partial name="_SoloPantalla" />
+
+<div class="row g-2 align-items-end mb-3">
+    <div class="col-md-4">
+        <label class="form-label">Número de registro</label>
+        <input class="form-control" value="0457" />
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-primary">Buscar</button>
+    </div>
+</div>
+
+<p>Afiliado: Nombre Apellido &nbsp;|&nbsp; Deuda: Bs 105</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="row g-2">
+            <div class="col-6">
+                <label class="form-label">Número de recibo</label>
+                <input class="form-control" value="R-1022" />
+            </div>
+            <div class="col-6">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" value="2026-10-25" />
+            </div>
+            <div class="col-6">
+                <label class="form-label">Monto (Bs)</label>
+                <input class="form-control" value="105" />
+            </div>
+            <div class="col-6">
+                <label class="form-label">Meses cubiertos</label>
+                <input class="form-control" value="3" />
+            </div>
+            <div class="col-12">
+                <button type="button" class="btn btn-success">Registrar pago</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h2 class="h6">Pagos registrados</h2>
+        <table class="table table-sm table-striped">
+            <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th></tr></thead>
+            <tbody>
+                <tr><td>R-1021</td><td>05/08/2026</td><td>Bs 105</td></tr>
+                <tr><td>R-0990</td><td>02/05/2026</td><td>Bs 105</td></tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-outline-primary">Corregir pago</button>
+        <p class="text-muted small mt-2">Cada corrección queda en la bitácora.</p>
+    </div>
+</div>

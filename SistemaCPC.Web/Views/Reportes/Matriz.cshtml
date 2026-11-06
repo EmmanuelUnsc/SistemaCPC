@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Matriz de afiliados";
+}
+
+<partial name="_Menu" />
+
+<h1>Generar reportes: matriz de afiliados</h1>
+<partial name="_SoloPantalla" />
+
+<p>Una fila por afiliado: registro, nombre, fecha de afiliación, contacto, profesión, estado, deuda y meses adeudados.</p>
+
+<table class="table table-striped">
+    <thead><tr><th>Registro</th><th>Nombre</th><th>Afiliación</th><th>Estado</th><th>Deuda</th><th>Meses</th></tr></thead>
+    <tbody>
+        <tr><td>0457</td><td>Nombre Apellido</td><td>15/03/2015</td><td>Activo</td><td>Bs 105</td><td>3</td></tr>
+        <tr><td>0458</td><td>Nombre Apellido</td><td>02/07/2019</td><td>Inactivo</td><td>Bs 420</td><td>12</td></tr>
+    </tbody>
+</table>
+<button type="button" class="btn btn-outline-success">Descargar en Excel</button>

@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CPC</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @{
+        var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+        var accion = ViewContext.RouteData.Values["action"]?.ToString();
+        string Activa(string c, string? a = null) =>
+            controlador == c && (a == null || accion == a) ? "nav-link active" : "nav-link";
+    }
+    <header class="border-bottom mb-3 bg-light">
+        <div class="container pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fs-5 fw-semibold">CPC - Sistema de gestión</span>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span class="text-muted small">@User.FindFirst("Nombre")?.Value (@User.Identity.Name)</span>
+                }
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <ul class="nav nav-tabs">
+                    @if (User.IsInRole("Directorio"))
+                    {
+                        <li class="nav-item"><a class="@Activa("Afiliados")" asp-controller="Afiliados" asp-action="Index">Afiliados</a></li>
+                        <li class="nav-item"><a class="@Activa("Pagos")" asp-controller="Pagos" asp-action="Index">Pagos</a></li>
+                        <li class="nav-item"><a class="@Activa("Defensas")" asp-controller="Defensas" asp-action="Index">Defensas</a></li>
+                        <li class="nav-item"><a class="@Activa("Reportes")" asp-controller="Reportes" asp-action="Index">Reportes</a></li>
+                        <li class="nav-item"><a class="@Activa("Avisos")" asp-controller="Avisos" asp-action="Index">Avisos</a></li>
+                    }
+                    @if (User.IsInRole("Superadministrador"))
+                    {
+                        <li class="nav-item"><a class="@Activa("Ajustes")" asp-controller="Ajustes" asp-action="Index">Ajustes</a></li>
+                    }
+                    @if (User.IsInRole("Afiliado"))
+                    {
+                        <li class="nav-item"><a class="@(controlador == "MiCuenta" && accion != "Defensas" ? "nav-link active" : "nav-link")" asp-controller="MiCuenta" asp-action="Index">Mi estado de cuenta</a></li>
+                        <li class="nav-item"><a class="@Activa("MiCuenta", "Defensas")" asp-controller="MiCuenta" asp-action="Defensas">Mis defensas</a></li>
+                    }
+                    <li class="nav-item">
+                        <form asp-controller="Cuenta" asp-action="Logout" method="post">
+                            <button type="submit" class="nav-link">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            }
+        </div>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

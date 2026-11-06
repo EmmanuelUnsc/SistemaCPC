@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <h1 class="h3 text-center">Colegio de Profesionales en Comunicación</h1>
+        <p class="text-center text-muted mb-4">Ingrese con su número de registro</p>
+
+        @if (ViewData["Error"] != null)
+        {
+            <div class="alert alert-danger">@ViewData["Error"]</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label class="form-label" for="registro">Número de registro</label>
+                <input type="text" id="registro" name="registro" class="form-control" value="@ViewData["Registro"]" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="contrasena">Contraseña</label>
+                <input type="password" id="contrasena" name="contrasena" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+        </form>
+    </div>
+</div>

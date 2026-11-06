@@ -1,0 +1,9 @@
+@{
+    var accion = ViewContext.RouteData.Values["action"]?.ToString();
+    string Activa(string a) => accion == a ? "nav-link active" : "nav-link";
+}
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item"><a class="@Activa("Index")" asp-action="Index">Defensas del período</a></li>
+    <li class="nav-item"><a class="@Activa("Estados")" asp-action="Estados">Afiliados por estado</a></li>
+    <li class="nav-item"><a class="@Activa("Matriz")" asp-action="Matriz">Matriz de afiliados</a></li>
+</ul>

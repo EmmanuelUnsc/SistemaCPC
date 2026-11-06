@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Gestionar avisos";
+}
+
+<h1>Gestionar avisos</h1>
+<partial name="_SoloPantalla" />
+
+<div class="row g-3 mb-4">
+    <div class="col-md-7">
+        <label class="form-label">Título</label>
+        <input class="form-control" value="Asamblea general" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Visible hasta</label>
+        <input type="date" class="form-control" value="2026-10-30" />
+    </div>
+    <div class="col-md-7">
+        <label class="form-label">Mensaje</label>
+        <textarea class="form-control" rows="3">Sábado 9:00, sede del Colegio</textarea>
+    </div>
+    <div class="col-12">
+        <button type="button" class="btn btn-success">Publicar</button>
+    </div>
+</div>
+
+<h2 class="h6">Avisos vigentes</h2>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-striped">
+            <thead><tr><th>Título</th><th>Vence</th></tr></thead>
+            <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
+        </table>
+    </div>
+    <div class="col-md-4 d-grid gap-2 align-content-start">
+        <button type="button" class="btn btn-outline-primary">Editar</button>
+        <button type="button" class="btn btn-outline-danger">Retirar</button>
+    </div>
+</div>

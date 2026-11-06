@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Mi estado de cuenta";
+}
+
+<h1>Mi estado de cuenta</h1>
+<partial name="_SoloPantalla" />
+
+<p>Estado: Activo &nbsp;|&nbsp; Deuda total: Bs 105</p>
+
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="h6">Meses adeudados</h2>
+        <table class="table table-sm table-striped">
+            <thead><tr><th>Año</th><th>Meses</th><th>Monto</th></tr></thead>
+            <tbody><tr><td>2026</td><td>Agosto a Octubre</td><td>Bs 105</td></tr></tbody>
+        </table>
+
+        <h2 class="h6">Historial de pagos</h2>
+        <table class="table table-sm table-striped">
+            <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th></tr></thead>
+            <tbody>
+                <tr><td>R-1021</td><td>05/08/2026</td><td>Bs 105</td><td>3</td></tr>
+                <tr><td>R-0990</td><td>02/05/2026</td><td>Bs 105</td><td>3</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4">
+        <a class="btn btn-primary w-100 mb-4" asp-action="Pagar">Pagar mi deuda</a>
+
+        <h2 class="h6">Avisos vigentes</h2>
+        <table class="table table-sm table-striped">
+            <thead><tr><th>Aviso</th><th>Vence</th></tr></thead>
+            <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
+        </table>
+    </div>
+</div>

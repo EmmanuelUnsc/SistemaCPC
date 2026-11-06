@@ -1,0 +1,17 @@
+# Base de datos de desarrollo del Sistema CPC.
+# Levantar con: docker compose up -d
+services:
+  postgres:
+    image: postgres:17
+    container_name: sistemacpc-db
+    environment:
+      POSTGRES_DB: sistemacpc
+      POSTGRES_USER: cpc
+      POSTGRES_PASSWORD: cpc_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - datos:/var/lib/postgresql/data
+
+volumes:
+  datos:

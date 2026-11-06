@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Registrar ajuste";
+}
+
+<h1>Registrar ajuste</h1>
+<partial name="_SoloPantalla" />
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Número de registro</label>
+        <input class="form-control" value="0457" />
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="button" class="btn btn-primary">Buscar</button>
+    </div>
+    <div class="w-100"></div>
+    <div class="col-md-4">
+        <label class="form-label">Tipo de ajuste</label>
+        <select class="form-select"><option>Recibo faltante</option><option>Corrección de deuda</option></select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Monto (Bs)</label>
+        <input class="form-control" value="70" />
+    </div>
+    <div class="col-md-7">
+        <label class="form-label">Motivo (obligatorio)</label>
+        <textarea class="form-control" rows="3">Meses omitidos en la carga</textarea>
+    </div>
+    <p class="text-muted mb-0">El ajuste queda en la bitácora con usuario, fecha y valores.</p>
+    <div class="col-12">
+        <button type="button" class="btn btn-success">Guardar ajuste</button>
+    </div>
+</div>

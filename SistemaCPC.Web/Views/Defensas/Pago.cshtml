@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Pagar defensa";
+}
+
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item"><a class="nav-link" asp-action="Index">Registrar defensa</a></li>
+    <li class="nav-item"><a class="nav-link active" asp-action="Pago">Pagar defensa</a></li>
+</ul>
+
+<h1>Pagar defensa</h1>
+<partial name="_SoloPantalla" />
+
+<h2 class="h6">Defensas por pagar</h2>
+<table class="table table-striped">
+    <thead><tr><th>Oficio</th><th>Tribunal</th><th>Universidad</th><th>Fecha</th></tr></thead>
+    <tbody>
+        <tr><td>OF-240/2026</td><td>0457 - Nombre Apellido</td><td>Universidad A</td><td>08/10/2026</td></tr>
+    </tbody>
+</table>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Número de recibo</label>
+        <input class="form-control" value="RD-046" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Fecha</label>
+        <input type="date" class="form-control" value="2026-10-25" />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Monto (Bs)</label>
+        <input class="form-control" value="208" />
+    </div>
+    <div class="col-12">
+        <button type="button" class="btn btn-success">Registrar pago</button>
+    </div>
+    <p class="text-muted">Al registrar el pago, la defensa pasa a Pagada.</p>
+</div>
