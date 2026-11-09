@@ -11,7 +11,6 @@ public enum Rol
 }
 
 // Clase base de Afiliado y MiembroDirectorio (una sola tabla "Usuarios").
-// Sprint 1: solo los datos que necesita CU-01 Iniciar sesión.
 public abstract class Usuario
 {
     public int Id { get; set; }
@@ -32,6 +31,56 @@ public class Afiliado : Usuario
     [Required]
     [StringLength(120)]
     public string Nombre { get; set; } = string.Empty;
+
+    [StringLength(20)]
+    public string Carnet { get; set; } = string.Empty;
+
+    public DateOnly FechaAfiliacion { get; set; }
+
+    public DateOnly FechaInicioCobro { get; set; }
+
+    public bool EsTribunal { get; set; }
+
+    public DateOnly? FechaBaja { get; set; }
+
+    [StringLength(20)]
+    public string? MotivoBaja { get; set; }
+
+    public List<Pago> Pagos { get; set; } = new();
+
+    public List<Defensa> Defensas { get; set; } = new();
+
+    // Meses que debería haber pagado desde el inicio de cobro hasta el mes actual inclusive.
+    public int MesesTranscurridos(DateOnly hoy)
+    {
+        if (hoy < FechaInicioCobro)
+        {
+            return 0;
+        }
+
+        return (hoy.Year - FechaInicioCobro.Year) * 12 + hoy.Month - FechaInicioCobro.Month + 1;
+    }
+
+    public int MesesAdeudados(DateOnly hoy)
+    {
+        return Math.Max(0, MesesTranscurridos(hoy) - Pagos.Sum(p => p.MesesCubiertos));
+    }
+
+    public decimal CalcularDeuda(decimal aporteMensual, DateOnly hoy)
+    {
+        return MesesAdeudados(hoy) * aporteMensual;
+    }
+
+    // RF-25: el estado se calcula, no se guarda.
+    public EstadoAfiliado ObtenerEstado(int umbralInactividad, DateOnly hoy)
+    {
+        if (FechaBaja != null)
+        {
+            return MotivoBaja == "Fallecimiento" ? EstadoAfiliado.Fallecido : EstadoAfiliado.Renunciado;
+        }
+
+        return MesesAdeudados(hoy) >= umbralInactividad ? EstadoAfiliado.Inactivo : EstadoAfiliado.Activo;
+    }
 }
 
 public class MiembroDirectorio : Usuario

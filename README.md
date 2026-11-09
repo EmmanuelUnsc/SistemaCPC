@@ -55,22 +55,39 @@ Son inventados. No cargar datos reales del Excel del Colegio.
 |---|---|---|
 | admin | admin123 | Superadministrador |
 | dir01 | dir123 | Directorio |
-| 0457 | 0457 | Afiliado |
+| 0457 | 0457 | Afiliado (tribunal habilitado) |
+| 0458 | 0458 | Afiliado |
 
 ## API
 
-| Método | Ruta | Caso de uso | Respuesta |
+| Método | Ruta | Caso de uso | Patrón |
 |---|---|---|---|
-| POST | `/api/auth/login` | CU-01 Iniciar sesión | 200 con id, registro, nombre y rol; 401 si el registro o la contraseña son incorrectos |
+| POST | `/api/auth/login` | CU-01 Iniciar sesión | |
+| GET | `/api/parametros` | Parámetros de los cálculos | Singleton |
+| GET | `/api/pagos/{registro}` | CU-05 Gestionar pagos (consulta) | |
+| POST | `/api/pagos/plataforma` | CU-04 Pagar aportes (simulado) | Factory Method |
+| POST | `/api/pagos/oficina` | CU-05 Gestionar pagos | Factory Method |
+| GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Builder |
+| GET | `/api/reportes/estados` | CU-09 Afiliados por estado | Builder |
+| GET | `/api/reportes/matriz` | CU-09 Matriz de afiliados | Builder |
 
 Se puede probar en http://localhost:5100/swagger o con `SistemaCPC.Api/SistemaCPC.Api.http`.
 
-## Sprint 1
+## Patrones de diseño
+
+En `SistemaCPC.Api/Patrones/`, los patrones creacionales elegidos en la dinámica de Ingeniería de Software:
+
+- `Singleton/ParametrosSistema.cs`: una sola instancia de los parámetros, registrada con `AddSingleton` en `Program.cs`.
+- `FactoryMethod/RegistroDePago.cs`: el proceso común de registrar un pago; `RegistroPagoPlataforma` (CU-04) y
+  `RegistroPagoOficina` (CU-05) deciden cómo se crea el recibo.
+- `Builder/ConstructorReporte.cs`: los tres reportes de CU-09 se arman con los mismos pasos; `ServicioReportes` los ejecuta en orden.
+
+## Estado actual
 
 - CU-01 Iniciar sesión funciona de punta a punta: la Web envía los datos a la API, la API los valida
   contra PostgreSQL y la Web abre el panel del rol.
-- Las demás pantallas (CU-02 a CU-13) siguen los mockups de Balsamiq con datos de ejemplo.
-  Sus botones todavía no hacen nada: cada caso de uso se conecta a la API en los siguientes sprints.
+- La API ya registra pagos (CU-04 y CU-05) y genera los reportes de CU-09.
+- Las pantallas de la Web siguen los mockups de Balsamiq con datos de ejemplo; todavía no llaman a esos endpoints.
 
 ## Base de datos
 

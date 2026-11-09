@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Patrones.Builder;
+using SistemaCPC.Api.Patrones.Singleton;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,12 +11,20 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<CpcContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CpcConexion")));
 
+// Singleton: una sola instancia de los parámetros para toda la API.
+builder.Services.AddSingleton<ParametrosSistema>();
+
+// Builder: el director que arma los reportes de CU-09.
+builder.Services.AddScoped<ServicioReportes>();
+
 var app = builder.Build();
 
-// Crea las tablas y carga los usuarios de prueba si la base está vacía.
+// Crea las tablas, carga los datos de prueba si faltan y carga los parámetros en el Singleton.
 using (var scope = app.Services.CreateScope())
 {
-    DatosIniciales.Cargar(scope.ServiceProvider.GetRequiredService<CpcContext>());
+    var context = scope.ServiceProvider.GetRequiredService<CpcContext>();
+    DatosIniciales.Cargar(context);
+    app.Services.GetRequiredService<ParametrosSistema>().Cargar(context.Parametros.First());
 }
 
 if (app.Environment.IsDevelopment())
