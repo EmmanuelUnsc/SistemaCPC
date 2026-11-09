@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Patrones.Facade;
 using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Patrones.Builder;
@@ -82,10 +83,15 @@ public class ReporteDefensas : ConstructorReporte
 }
 
 // Afiliados por estado: cuántos hay en cada estado y la lista con su deuda.
+// El estado y la deuda los calcula la fachada EstadoDeCuenta, igual que en CU-02.
 public class ReporteAfiliadosPorEstado : ConstructorReporte
 {
-    public ReporteAfiliadosPorEstado(CpcContext context, ParametrosSistema parametros) : base(context, parametros)
+    private readonly EstadoDeCuenta _estadoDeCuenta;
+
+    public ReporteAfiliadosPorEstado(CpcContext context, ParametrosSistema parametros, EstadoDeCuenta estadoDeCuenta)
+        : base(context, parametros)
     {
+        _estadoDeCuenta = estadoDeCuenta;
         Reporte.Titulo = "Afiliados por estado";
         Reporte.Columnas = new() { "Registro", "Nombre", "Estado", "Deuda (Bs)" };
     }
@@ -96,8 +102,8 @@ public class ReporteAfiliadosPorEstado : ConstructorReporte
 
         foreach (var a in afiliados)
         {
-            Reporte.Filas.Add(new() { a.Registro, a.Nombre, a.ObtenerEstado(Parametros.UmbralInactividad, Hoy).ToString(),
-                a.CalcularDeuda(Parametros.AporteMensual, Hoy).ToString("0.00") });
+            var resumen = _estadoDeCuenta.Resumir(a);
+            Reporte.Filas.Add(new() { a.Registro, a.Nombre, resumen.Estado.ToString(), resumen.Deuda.ToString("0.00") });
         }
     }
 
@@ -113,8 +119,12 @@ public class ReporteAfiliadosPorEstado : ConstructorReporte
 // Matriz de afiliados: una fila por afiliado con sus datos, estado, deuda y meses adeudados.
 public class MatrizAfiliados : ConstructorReporte
 {
-    public MatrizAfiliados(CpcContext context, ParametrosSistema parametros) : base(context, parametros)
+    private readonly EstadoDeCuenta _estadoDeCuenta;
+
+    public MatrizAfiliados(CpcContext context, ParametrosSistema parametros, EstadoDeCuenta estadoDeCuenta)
+        : base(context, parametros)
     {
+        _estadoDeCuenta = estadoDeCuenta;
         Reporte.Titulo = "Matriz de afiliados";
         Reporte.Columnas = new() { "Registro", "Nombre", "Afiliación", "Estado", "Deuda (Bs)", "Meses" };
     }
@@ -125,9 +135,9 @@ public class MatrizAfiliados : ConstructorReporte
 
         foreach (var a in afiliados)
         {
+            var resumen = _estadoDeCuenta.Resumir(a);
             Reporte.Filas.Add(new() { a.Registro, a.Nombre, a.FechaAfiliacion.ToString("dd/MM/yyyy"),
-                a.ObtenerEstado(Parametros.UmbralInactividad, Hoy).ToString(),
-                a.CalcularDeuda(Parametros.AporteMensual, Hoy).ToString("0.00"), a.MesesAdeudados(Hoy).ToString() });
+                resumen.Estado.ToString(), resumen.Deuda.ToString("0.00"), resumen.MesesAdeudados.ToString() });
         }
     }
 

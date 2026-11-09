@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Patrones.Builder;
+using SistemaCPC.Api.Patrones.Facade;
 using SistemaCPC.Api.Patrones.Singleton;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,9 @@ builder.Services.AddSingleton<ParametrosSistema>();
 
 // Builder: el director que arma los reportes de CU-09.
 builder.Services.AddScoped<ServicioReportes>();
+
+// Facade: el estado de cuenta de CU-02 y CU-03, que también usan los reportes.
+builder.Services.AddScoped<EstadoDeCuenta>();
 
 var app = builder.Build();
 

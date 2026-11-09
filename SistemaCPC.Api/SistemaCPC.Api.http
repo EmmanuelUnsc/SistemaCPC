@@ -21,6 +21,12 @@ Content-Type: application/json
 ### Singleton: parámetros del sistema
 GET {{SistemaCPC.Api_HostAddress}}/api/parametros
 
+### Facade, CU-02: estado de cuenta
+GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0457
+
+### Facade, CU-03: saldo de tribunal
+GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0457/tribunal
+
 ### Factory Method, CU-04: pago simulado en la plataforma (el sistema numera el recibo)
 POST {{SistemaCPC.Api_HostAddress}}/api/pagos/plataforma
 Content-Type: application/json

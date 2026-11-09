@@ -64,6 +64,8 @@ Son inventados. No cargar datos reales del Excel del Colegio.
 |---|---|---|---|
 | POST | `/api/auth/login` | CU-01 Iniciar sesión | |
 | GET | `/api/parametros` | Parámetros de los cálculos | Singleton |
+| GET | `/api/estado-cuenta/{registro}` | CU-02 Consultar estado de cuenta | Facade |
+| GET | `/api/estado-cuenta/{registro}/tribunal` | CU-03 Consultar saldo de tribunal | Facade |
 | GET | `/api/pagos/{registro}` | CU-05 Gestionar pagos (consulta) | |
 | POST | `/api/pagos/plataforma` | CU-04 Pagar aportes (simulado) | Factory Method |
 | POST | `/api/pagos/oficina` | CU-05 Gestionar pagos | Factory Method |
@@ -75,18 +77,25 @@ Se puede probar en http://localhost:5100/swagger o con `SistemaCPC.Api/SistemaCP
 
 ## Patrones de diseño
 
-En `SistemaCPC.Api/Patrones/`, los patrones creacionales elegidos en la dinámica de Ingeniería de Software:
+Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpetas `Patrones/`:
 
-- `Singleton/ParametrosSistema.cs`: una sola instancia de los parámetros, registrada con `AddSingleton` en `Program.cs`.
-- `FactoryMethod/RegistroDePago.cs`: el proceso común de registrar un pago; `RegistroPagoPlataforma` (CU-04) y
-  `RegistroPagoOficina` (CU-05) deciden cómo se crea el recibo.
-- `Builder/ConstructorReporte.cs`: los tres reportes de CU-09 se arman con los mismos pasos; `ServicioReportes` los ejecuta en orden.
+| Patrón | Archivo | Caso de uso |
+|---|---|---|
+| Singleton | `SistemaCPC.Api/Patrones/Singleton/ParametrosSistema.cs` (registrado con `AddSingleton`) | CU-02, CU-03, CU-07, CU-09 |
+| Factory Method | `SistemaCPC.Api/Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
+| Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
+| Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
+| Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` | CU-01 (y cada caso de uso que la Web conecte a la API) |
+
+Pendientes, se programan junto con su caso de uso: Decorator (bitácora de CU-10 y de la corrección de CU-05)
+y Adapter (exportación a Excel de CU-09).
 
 ## Estado actual
 
 - CU-01 Iniciar sesión funciona de punta a punta: la Web envía los datos a la API, la API los valida
   contra PostgreSQL y la Web abre el panel del rol.
-- La API ya registra pagos (CU-04 y CU-05) y genera los reportes de CU-09.
+- La API ya da el estado de cuenta (CU-02) y el saldo de tribunal (CU-03), registra pagos (CU-04 y CU-05)
+  y genera los reportes de CU-09.
 - Las pantallas de la Web siguen los mockups de Balsamiq con datos de ejemplo; todavía no llaman a esos endpoints.
 
 ## Base de datos

@@ -1,21 +1,20 @@
-using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using SistemaCPC.Web.Models;
+using SistemaCPC.Web.Patrones.Proxy;
 
 namespace SistemaCPC.Web.Controllers;
 
-// CU-01 Iniciar sesión: la Web envía el registro y la contraseña a la API y, si son correctos,
-// guarda la sesión con el nombre y el rol que devuelve la API.
+// CU-01 Iniciar sesión: el servicio de autenticación valida el registro y la contraseña y, si son correctos,
+// la Web guarda la sesión con el nombre y el rol. El controlador usa el proxy sin saber que hay una API detrás.
 public class CuentaController : Controller
 {
-    private readonly IHttpClientFactory _clientes;
+    private readonly IServicioAutenticacion _autenticacion;
 
-    public CuentaController(IHttpClientFactory clientes)
+    public CuentaController(IServicioAutenticacion autenticacion)
     {
-        _clientes = clientes;
+        _autenticacion = autenticacion;
     }
 
     public IActionResult Login()
@@ -28,36 +27,20 @@ public class CuentaController : Controller
     public async Task<IActionResult> Login(string registro, string contrasena)
     {
         ViewData["Registro"] = registro;
-        var api = _clientes.CreateClient("Api");
 
-        HttpResponseMessage respuesta;
-        try
+        var resultado = await _autenticacion.IniciarSesion(registro, contrasena);
+
+        if (resultado.Usuario == null)
         {
-            respuesta = await api.PostAsJsonAsync("api/auth/login", new { registro, contrasena });
-        }
-        catch (HttpRequestException)
-        {
-            ViewData["Error"] = "No se pudo conectar con la API. Verifique que SistemaCPC.Api esté en ejecución.";
+            ViewData["Error"] = resultado.Error;
             return View();
         }
 
-        if (respuesta.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            ViewData["Error"] = "Registro o contraseña incorrectos.";
-            return View();
-        }
-
-        if (!respuesta.IsSuccessStatusCode)
-        {
-            ViewData["Error"] = "Ingrese su registro y su contraseña.";
-            return View();
-        }
-
-        var usuario = await respuesta.Content.ReadFromJsonAsync<LoginRespuesta>();
+        var usuario = resultado.Usuario;
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, usuario!.Id.ToString()),
+            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new(ClaimTypes.Name, usuario.Registro),
             new("Nombre", usuario.Nombre),
             new(ClaimTypes.Role, usuario.Rol)
