@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SistemaCPC.Api.Models;
 
-// Roles del sistema (enumeración Rol del diagrama de clases).
 public enum Rol
 {
     Afiliado,
@@ -10,7 +9,6 @@ public enum Rol
     Superadministrador
 }
 
-// Clase base de Afiliado y MiembroDirectorio (una sola tabla "Usuarios").
 public abstract class Usuario
 {
     public int Id { get; set; }
@@ -50,7 +48,6 @@ public class Afiliado : Usuario
 
     public List<Defensa> Defensas { get; set; } = new();
 
-    // Meses que debería haber pagado desde el inicio de cobro hasta el mes actual inclusive.
     public int MesesTranscurridos(DateOnly hoy)
     {
         if (hoy < FechaInicioCobro)
@@ -71,7 +68,6 @@ public class Afiliado : Usuario
         return MesesAdeudados(hoy) * aporteMensual;
     }
 
-    // RF-25: el estado se calcula, no se guarda.
     public EstadoAfiliado ObtenerEstado(int umbralInactividad, DateOnly hoy)
     {
         if (FechaBaja != null)
@@ -93,7 +89,6 @@ public class MiembroDirectorio : Usuario
     public string Cargo { get; set; } = string.Empty;
 }
 
-// Miembro del directorio que además registra ajustes (CU-10).
 public class Superadministrador : MiembroDirectorio
 {
 }

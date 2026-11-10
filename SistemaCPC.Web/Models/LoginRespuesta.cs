@@ -1,6 +1,5 @@
 namespace SistemaCPC.Web.Models;
 
-// Lo que devuelve POST /api/auth/login de SistemaCPC.Api.
 public class LoginRespuesta
 {
     public int Id { get; set; }

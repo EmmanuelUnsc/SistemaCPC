@@ -21,7 +21,6 @@ public class Defensa
 
     public EstadoDefensa Estado { get; set; } = EstadoDefensa.PorPagar;
 
-    // Tribunal: un afiliado habilitado (un tribunal por defensa, RF-33).
     public int AfiliadoId { get; set; }
     public Afiliado? Afiliado { get; set; }
 }

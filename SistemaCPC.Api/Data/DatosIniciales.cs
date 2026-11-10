@@ -4,12 +4,6 @@ using SistemaCPC.Api.Models;
 
 namespace SistemaCPC.Api.Data;
 
-// Datos de prueba para desarrollo. Son inventados: no usar datos del Excel del Colegio.
-// Registro / contraseña:
-//   admin / admin123   Superadministrador
-//   dir01 / dir123     Directorio
-//   0457  / 0457       Afiliado (tribunal habilitado)
-//   0458  / 0458       Afiliado
 public static class DatosIniciales
 {
     public static void Cargar(CpcContext context)
@@ -36,7 +30,6 @@ public static class DatosIniciales
             context.SaveChanges();
         }
 
-        // Parámetros y datos de ejemplo de afiliados, pagos y defensas.
         if (context.Parametros.Any())
         {
             return;
@@ -60,7 +53,6 @@ public static class DatosIniciales
         afiliado2.ContrasenaCifrada = hasher.HashPassword(afiliado2, "0458");
         context.Afiliados.Add(afiliado2);
 
-        // El afiliado 0457 queda debiendo los últimos 3 meses.
         var meses = afiliado1.MesesTranscurridos(hoy) - 3;
         afiliado1.Pagos.Add(new Pago { NumeroRecibo = "R-0990", Fecha = hoy.AddMonths(-4), Monto = meses * 35, MesesCubiertos = meses, Origen = OrigenPago.Oficina });
 

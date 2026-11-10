@@ -1,7 +1,5 @@
 namespace SistemaCPC.Api.Models;
 
-// Enumeraciones del diagrama de clases (Documento de Diseño).
-
 public enum EstadoAfiliado
 {
     Activo,

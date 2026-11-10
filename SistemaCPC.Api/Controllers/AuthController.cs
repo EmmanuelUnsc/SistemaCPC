@@ -6,7 +6,6 @@ using SistemaCPC.Api.Models;
 
 namespace SistemaCPC.Api.Controllers;
 
-// CU-01 Iniciar sesión
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
@@ -18,8 +17,6 @@ public class AuthController : ControllerBase
         _context = context;
     }
 
-    // POST api/auth/login
-    // 200 con los datos del usuario si el registro y la contraseña son correctos; 401 si no.
     [HttpPost("login")]
     public async Task<ActionResult<LoginRespuesta>> Login(LoginSolicitud solicitud)
     {

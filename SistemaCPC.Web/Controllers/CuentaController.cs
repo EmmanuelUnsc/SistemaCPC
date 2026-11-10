@@ -6,8 +6,6 @@ using SistemaCPC.Web.Patrones.Proxy;
 
 namespace SistemaCPC.Web.Controllers;
 
-// CU-01 Iniciar sesión: el servicio de autenticación valida el registro y la contraseña y, si son correctos,
-// la Web guarda la sesión con el nombre y el rol. El controlador usa el proxy sin saber que hay una API detrás.
 public class CuentaController : Controller
 {
     private readonly IServicioAutenticacion _autenticacion;
@@ -46,7 +44,6 @@ public class CuentaController : Controller
             new(ClaimTypes.Role, usuario.Rol)
         };
 
-        // El superadministrador también es miembro del directorio.
         if (usuario.Rol == "Superadministrador")
         {
             claims.Add(new Claim(ClaimTypes.Role, "Directorio"));

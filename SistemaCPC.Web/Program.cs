@@ -5,15 +5,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-// Cliente HTTP para llamar a SistemaCPC.Api (la dirección está en appsettings.json).
 builder.Services.AddHttpClient("Api", cliente =>
     cliente.BaseAddress = new Uri(builder.Configuration["ApiUrl"]!));
 
-// Proxy: los controladores usan las interfaces de servicio; el proxy hace la llamada HTTP a la API.
+// Patrón Proxy
 builder.Services.AddScoped<IServicioAutenticacion, ProxyAutenticacion>();
 
-// CU-01 Iniciar sesión: después de que la API valida al usuario, la Web guarda la sesión en una cookie
-// que vence a los 30 minutos sin uso.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opciones =>
     {

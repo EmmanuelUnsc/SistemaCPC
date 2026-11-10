@@ -4,9 +4,7 @@ using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Patrones.FactoryMethod;
 
-// Patrón Factory Method: el proceso de registrar un pago es el mismo en CU-04 y CU-05
-// (validar, guardar y actualizar el saldo); solo cambia cómo se crea el recibo,
-// y eso lo decide cada subclase en CrearRecibo().
+// Patrón Factory Method
 public abstract class RegistroDePago
 {
     protected readonly CpcContext Context;
@@ -18,7 +16,7 @@ public abstract class RegistroDePago
         _parametros = parametros;
     }
 
-    // Método de fábrica.
+    // Factory Method: método de fábrica
     protected abstract Pago CrearRecibo();
 
     public async Task<Pago> Registrar(Afiliado afiliado, int mesesCubiertos)
@@ -34,14 +32,12 @@ public abstract class RegistroDePago
         pago.MesesCubiertos = mesesCubiertos;
         pago.Monto = mesesCubiertos * _parametros.AporteMensual;
 
-        // El saldo se calcula con los pagos guardados, así que al guardar el pago se actualiza.
         Context.Pagos.Add(pago);
         await Context.SaveChangesAsync();
         return pago;
     }
 }
 
-// CU-04 Pagar aportes (simulado): el sistema numera el recibo.
 public class RegistroPagoPlataforma : RegistroDePago
 {
     public RegistroPagoPlataforma(CpcContext context, ParametrosSistema parametros)
@@ -54,7 +50,6 @@ public class RegistroPagoPlataforma : RegistroDePago
     }
 }
 
-// CU-05 Gestionar pagos: el directorio ingresa el número del recibo físico de la oficina.
 public class RegistroPagoOficina : RegistroDePago
 {
     private readonly string _numeroRecibo;

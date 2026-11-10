@@ -12,18 +12,17 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<CpcContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CpcConexion")));
 
-// Singleton: una sola instancia de los parámetros para toda la API.
+// Patrón Singleton
 builder.Services.AddSingleton<ParametrosSistema>();
 
-// Builder: el director que arma los reportes de CU-09.
+// Patrón Builder: director
 builder.Services.AddScoped<ServicioReportes>();
 
-// Facade: el estado de cuenta de CU-02 y CU-03, que también usan los reportes.
+// Patrón Facade
 builder.Services.AddScoped<EstadoDeCuenta>();
 
 var app = builder.Build();
 
-// Crea las tablas, carga los datos de prueba si faltan y carga los parámetros en el Singleton.
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CpcContext>();
@@ -33,7 +32,6 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    // Documento OpenAPI en /openapi/v1.json y Swagger en /swagger para probar la API.
     app.MapOpenApi();
     app.UseSwaggerUI(opciones => opciones.SwaggerEndpoint("/openapi/v1.json", "SistemaCPC API"));
 }

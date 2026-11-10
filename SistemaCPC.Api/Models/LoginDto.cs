@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SistemaCPC.Api.Models;
 
-// Lo que recibe POST /api/auth/login.
 public class LoginSolicitud
 {
     [Required(ErrorMessage = "El registro es obligatorio.")]
@@ -12,7 +11,6 @@ public class LoginSolicitud
     public string Contrasena { get; set; } = string.Empty;
 }
 
-// Lo que devuelve la API cuando el inicio de sesión es correcto.
 public class LoginRespuesta
 {
     public int Id { get; set; }

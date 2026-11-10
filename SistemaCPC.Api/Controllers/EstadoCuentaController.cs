@@ -9,13 +9,11 @@ public class EstadoCuentaController : ControllerBase
 {
     private readonly EstadoDeCuenta _estadoDeCuenta;
 
-    // El controlador solo conoce la fachada.
     public EstadoCuentaController(EstadoDeCuenta estadoDeCuenta)
     {
         _estadoDeCuenta = estadoDeCuenta;
     }
 
-    // GET api/estado-cuenta/0457: CU-02 Consultar estado de cuenta
     [HttpGet("{registro}")]
     public async Task<ActionResult<EstadoCuentaRespuesta>> Obtener(string registro)
     {
@@ -29,7 +27,6 @@ public class EstadoCuentaController : ControllerBase
         return estado;
     }
 
-    // GET api/estado-cuenta/0457/tribunal: CU-03 Consultar saldo de tribunal
     [HttpGet("{registro}/tribunal")]
     public async Task<ActionResult<SaldoTribunalRespuesta>> SaldoTribunal(string registro)
     {

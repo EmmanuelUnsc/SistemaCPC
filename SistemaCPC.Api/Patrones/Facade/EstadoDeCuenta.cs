@@ -17,8 +17,7 @@ public record DefensaDelTribunal(string NumeroOficio, string Universidad, DateOn
 public record SaldoTribunalRespuesta(string Registro, string Nombre, int DefensasPorPagar, decimal MontoPorCobrar,
     decimal DeudaAportes, decimal SaldoNeto, List<DefensaDelTribunal> Defensas);
 
-// Patrón Facade: una sola puerta para todo lo que es "estado de cuenta".
-// Por dentro reúne Afiliado, Pago, Defensa y los parámetros (Singleton); quien la usa no arma el cálculo.
+// Patrón Facade
 public class EstadoDeCuenta
 {
     private readonly CpcContext _context;
@@ -32,7 +31,6 @@ public class EstadoDeCuenta
 
     private static DateOnly Hoy => DateOnly.FromDateTime(DateTime.Today);
 
-    // Cálculo común: lo usan CU-02, CU-03 y los reportes de CU-09. El afiliado debe venir con sus pagos.
     public ResumenAfiliado Resumir(Afiliado afiliado)
     {
         return new ResumenAfiliado(
@@ -41,7 +39,6 @@ public class EstadoDeCuenta
             afiliado.CalcularDeuda(_parametros.AporteMensual, Hoy));
     }
 
-    // CU-02 Consultar estado de cuenta
     public async Task<EstadoCuentaRespuesta?> ObtenerEstado(string registro)
     {
         var afiliado = await _context.Afiliados
@@ -63,7 +60,6 @@ public class EstadoDeCuenta
             resumen.MesesAdeudados, resumen.Deuda, pagos);
     }
 
-    // CU-03 Consultar saldo de tribunal: lo que el Colegio le debe por defensas menos lo que debe de aportes.
     public async Task<SaldoTribunalRespuesta?> ObtenerSaldoTribunal(string registro)
     {
         var afiliado = await _context.Afiliados

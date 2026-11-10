@@ -5,7 +5,6 @@ using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Patrones.Builder;
 
-// Producto que arma el Builder: lo devuelve la API y luego se mostrará en pantalla o en Excel.
 public class Reporte
 {
     public string Titulo { get; set; } = string.Empty;
@@ -16,8 +15,7 @@ public class Reporte
     public Dictionary<string, int> Totales { get; set; } = new();
 }
 
-// Patrón Builder: los tres reportes de CU-09 se arman con los mismos pasos;
-// cada constructor decide qué filas y qué totales lleva.
+// Patrón Builder
 public abstract class ConstructorReporte
 {
     protected readonly CpcContext Context;
@@ -44,7 +42,6 @@ public abstract class ConstructorReporte
     public Reporte ObtenerReporte() => Reporte;
 }
 
-// Defensas del período, con el total de defensas y de tribunales distintos.
 public class ReporteDefensas : ConstructorReporte
 {
     private int _tribunales;
@@ -82,8 +79,6 @@ public class ReporteDefensas : ConstructorReporte
     }
 }
 
-// Afiliados por estado: cuántos hay en cada estado y la lista con su deuda.
-// El estado y la deuda los calcula la fachada EstadoDeCuenta, igual que en CU-02.
 public class ReporteAfiliadosPorEstado : ConstructorReporte
 {
     private readonly EstadoDeCuenta _estadoDeCuenta;
@@ -116,7 +111,6 @@ public class ReporteAfiliadosPorEstado : ConstructorReporte
     }
 }
 
-// Matriz de afiliados: una fila por afiliado con sus datos, estado, deuda y meses adeudados.
 public class MatrizAfiliados : ConstructorReporte
 {
     private readonly EstadoDeCuenta _estadoDeCuenta;
@@ -147,7 +141,7 @@ public class MatrizAfiliados : ConstructorReporte
     }
 }
 
-// Director: ejecuta los pasos siempre en el mismo orden, para cualquier reporte.
+// Patrón Builder: director
 public class ServicioReportes
 {
     public async Task<Reporte> Generar(ConstructorReporte constructor, DateOnly? desde, DateOnly? hasta)

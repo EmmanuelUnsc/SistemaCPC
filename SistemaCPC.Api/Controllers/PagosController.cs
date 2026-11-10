@@ -35,7 +35,6 @@ public class PagosController : ControllerBase
         _parametros = parametros;
     }
 
-    // GET api/pagos/0457: pagos registrados del afiliado.
     [HttpGet("{registro}")]
     public async Task<ActionResult<List<PagoRespuesta>>> Listar(string registro)
     {
@@ -49,7 +48,6 @@ public class PagosController : ControllerBase
         return afiliado.Pagos.OrderByDescending(p => p.Fecha).Select(Respuesta).ToList();
     }
 
-    // POST api/pagos/plataforma: CU-04 Pagar aportes (simulado).
     [HttpPost("plataforma")]
     public Task<ActionResult<PagoRespuesta>> PagarEnPlataforma(PagoPlataformaSolicitud solicitud)
     {
@@ -57,7 +55,6 @@ public class PagosController : ControllerBase
             new RegistroPagoPlataforma(_context, _parametros));
     }
 
-    // POST api/pagos/oficina: CU-05 Gestionar pagos (pago recibido en la oficina).
     [HttpPost("oficina")]
     public async Task<ActionResult<PagoRespuesta>> RegistrarEnOficina(PagoOficinaSolicitud solicitud)
     {
@@ -75,7 +72,6 @@ public class PagosController : ControllerBase
             new RegistroPagoOficina(_context, _parametros, solicitud.NumeroRecibo));
     }
 
-    // El controlador no sabe cómo se crea el recibo: lo decide la subclase de RegistroDePago.
     private async Task<ActionResult<PagoRespuesta>> Registrar(string registro, int meses, RegistroDePago registroDePago)
     {
         var afiliado = await _context.Afiliados.FirstOrDefaultAsync(a => a.Registro == registro);

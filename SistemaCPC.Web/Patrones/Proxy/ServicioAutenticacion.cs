@@ -5,14 +5,12 @@ namespace SistemaCPC.Web.Patrones.Proxy;
 
 public record ResultadoLogin(LoginRespuesta? Usuario, string? Error);
 
-// Lo que necesitan las pantallas para iniciar sesión (CU-01), sin saber dónde está el servicio.
 public interface IServicioAutenticacion
 {
     Task<ResultadoLogin> IniciarSesion(string registro, string contrasena);
 }
 
-// Patrón Proxy (remoto): representa en la Web al servicio de autenticación que está en SistemaCPC.Api.
-// Hace la llamada HTTP, lee la respuesta y traduce los errores; el controlador solo usa la interfaz.
+// Patrón Proxy
 public class ProxyAutenticacion : IServicioAutenticacion
 {
     private readonly IHttpClientFactory _clientes;

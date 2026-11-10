@@ -7,7 +7,6 @@ namespace SistemaCPC.Web.Controllers;
 
 public class HomeController : Controller
 {
-    // Después de iniciar sesión cada rol va a su panel.
     [Authorize]
     public IActionResult Index()
     {
