@@ -63,6 +63,7 @@ public class ReporteDefensas : ConstructorReporte
             .OrderBy(d => d.Fecha)
             .ToListAsync();
 
+        // Patrón Iterator: lo da C# con foreach y LINQ
         foreach (var d in defensas)
         {
             Reporte.Filas.Add(new() { d.NumeroOficio, $"{d.Afiliado!.Registro} - {d.Afiliado.Nombre}", d.Universidad,
@@ -93,7 +94,7 @@ public class ReporteAfiliadosPorEstado : ConstructorReporte
 
     public override async Task AgregarFilas()
     {
-        var afiliados = await Context.Afiliados.Include(a => a.Pagos).OrderBy(a => a.Registro).ToListAsync();
+        var afiliados = await Context.Afiliados.Include(a => a.Pagos).Include(a => a.Ajustes).OrderBy(a => a.Registro).ToListAsync();
 
         foreach (var a in afiliados)
         {
@@ -125,7 +126,7 @@ public class MatrizAfiliados : ConstructorReporte
 
     public override async Task AgregarFilas()
     {
-        var afiliados = await Context.Afiliados.Include(a => a.Pagos).OrderBy(a => a.Registro).ToListAsync();
+        var afiliados = await Context.Afiliados.Include(a => a.Pagos).Include(a => a.Ajustes).OrderBy(a => a.Registro).ToListAsync();
 
         foreach (var a in afiliados)
         {

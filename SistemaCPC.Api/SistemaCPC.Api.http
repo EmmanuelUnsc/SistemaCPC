@@ -57,3 +57,44 @@ GET {{SistemaCPC.Api_HostAddress}}/api/reportes/estados
 
 ### Builder, CU-09: matriz de afiliados
 GET {{SistemaCPC.Api_HostAddress}}/api/reportes/matriz
+
+### Adapter, CU-09: matriz de afiliados en Excel
+GET {{SistemaCPC.Api_HostAddress}}/api/reportes/matriz/excel
+
+### Chain of Responsibility, CU-07: registrar defensa
+POST {{SistemaCPC.Api_HostAddress}}/api/defensas
+Content-Type: application/json
+
+{
+  "numeroOficio": "OF-301/2026",
+  "universidad": "Universidad A",
+  "carta": "Carta 102",
+  "fecha": "2026-11-20",
+  "registroTribunal": "0457"
+}
+
+### Chain of Responsibility, CU-07: tribunal no habilitado (400)
+POST {{SistemaCPC.Api_HostAddress}}/api/defensas
+Content-Type: application/json
+
+{
+  "numeroOficio": "OF-302/2026",
+  "universidad": "Universidad A",
+  "fecha": "2026-11-20",
+  "registroTribunal": "0458"
+}
+
+### Decorator, CU-10: registrar ajuste (queda en la bitácora)
+POST {{SistemaCPC.Api_HostAddress}}/api/ajustes
+Content-Type: application/json
+
+{
+  "registro": "0458",
+  "tipo": "Recibo faltante",
+  "monto": 35,
+  "motivo": "Mes omitido en la carga",
+  "superadministrador": "admin"
+}
+
+### Bitácora
+GET {{SistemaCPC.Api_HostAddress}}/api/ajustes/bitacora

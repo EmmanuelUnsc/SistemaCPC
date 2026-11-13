@@ -48,6 +48,8 @@ public class Afiliado : Usuario
 
     public List<Defensa> Defensas { get; set; } = new();
 
+    public List<Ajuste> Ajustes { get; set; } = new();
+
     public int MesesTranscurridos(DateOnly hoy)
     {
         if (hoy < FechaInicioCobro)
@@ -65,7 +67,7 @@ public class Afiliado : Usuario
 
     public decimal CalcularDeuda(decimal aporteMensual, DateOnly hoy)
     {
-        return MesesAdeudados(hoy) * aporteMensual;
+        return Math.Max(0, MesesAdeudados(hoy) * aporteMensual - Ajustes.Sum(a => a.Monto));
     }
 
     public EstadoAfiliado ObtenerEstado(int umbralInactividad, DateOnly hoy)

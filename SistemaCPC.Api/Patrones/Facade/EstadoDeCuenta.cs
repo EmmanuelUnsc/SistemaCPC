@@ -43,6 +43,7 @@ public class EstadoDeCuenta
     {
         var afiliado = await _context.Afiliados
             .Include(a => a.Pagos)
+            .Include(a => a.Ajustes)
             .FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
@@ -64,6 +65,7 @@ public class EstadoDeCuenta
     {
         var afiliado = await _context.Afiliados
             .Include(a => a.Pagos)
+            .Include(a => a.Ajustes)
             .Include(a => a.Defensas)
             .FirstOrDefaultAsync(a => a.Registro == registro && a.EsTribunal);
 

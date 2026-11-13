@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Patrones.Adapter;
 using SistemaCPC.Api.Patrones.Builder;
+using SistemaCPC.Api.Patrones.Decorator;
 using SistemaCPC.Api.Patrones.Facade;
 using SistemaCPC.Api.Patrones.Singleton;
 
@@ -20,6 +22,14 @@ builder.Services.AddScoped<ServicioReportes>();
 
 // Patrón Facade
 builder.Services.AddScoped<EstadoDeCuenta>();
+
+// Patrón Decorator
+builder.Services.AddScoped<ServicioAjustes>();
+builder.Services.AddScoped<IServicioAjustes>(sp => new ServicioConBitacora(
+    sp.GetRequiredService<ServicioAjustes>(), sp.GetRequiredService<CpcContext>(), sp.GetRequiredService<EstadoDeCuenta>()));
+
+// Patrón Adapter
+builder.Services.AddScoped<IExportador, ExportadorExcel>();
 
 var app = builder.Build();
 

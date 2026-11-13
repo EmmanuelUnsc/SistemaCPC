@@ -22,6 +22,45 @@ namespace SistemaCPC.Api.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SistemaCPC.Api.Models.Ajuste", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AfiliadoId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("SuperadministradorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AfiliadoId");
+
+                    b.HasIndex("SuperadministradorId");
+
+                    b.ToTable("Ajustes");
+                });
+
             modelBuilder.Entity("SistemaCPC.Api.Models.Defensa", b =>
                 {
                     b.Property<int>("Id")
@@ -126,6 +165,38 @@ namespace SistemaCPC.Api.Data.Migrations
                     b.ToTable("Parametros");
                 });
 
+            modelBuilder.Entity("SistemaCPC.Api.Models.RegistroBitacora", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Usuario")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("ValorAnterior")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("ValorNuevo")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Bitacora");
+                });
+
             modelBuilder.Entity("SistemaCPC.Api.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -226,6 +297,25 @@ namespace SistemaCPC.Api.Data.Migrations
                     b.HasDiscriminator().HasValue("Superadministrador");
                 });
 
+            modelBuilder.Entity("SistemaCPC.Api.Models.Ajuste", b =>
+                {
+                    b.HasOne("SistemaCPC.Api.Models.Afiliado", "Afiliado")
+                        .WithMany("Ajustes")
+                        .HasForeignKey("AfiliadoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SistemaCPC.Api.Models.Superadministrador", "Superadministrador")
+                        .WithMany()
+                        .HasForeignKey("SuperadministradorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Afiliado");
+
+                    b.Navigation("Superadministrador");
+                });
+
             modelBuilder.Entity("SistemaCPC.Api.Models.Defensa", b =>
                 {
                     b.HasOne("SistemaCPC.Api.Models.Afiliado", "Afiliado")
@@ -250,6 +340,8 @@ namespace SistemaCPC.Api.Data.Migrations
 
             modelBuilder.Entity("SistemaCPC.Api.Models.Afiliado", b =>
                 {
+                    b.Navigation("Ajustes");
+
                     b.Navigation("Defensas");
 
                     b.Navigation("Pagos");

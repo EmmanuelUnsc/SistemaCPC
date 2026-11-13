@@ -13,6 +13,8 @@ public class CpcContext : DbContext
     public DbSet<Pago> Pagos => Set<Pago>();
     public DbSet<Defensa> Defensas => Set<Defensa>();
     public DbSet<Parametros> Parametros => Set<Parametros>();
+    public DbSet<Ajuste> Ajustes => Set<Ajuste>();
+    public DbSet<RegistroBitacora> Bitacora => Set<RegistroBitacora>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -19,6 +19,7 @@ public abstract class RegistroDePago
     // Factory Method: método de fábrica
     protected abstract Pago CrearRecibo();
 
+    // Patrón Template Method: método plantilla
     public async Task<Pago> Registrar(Afiliado afiliado, int mesesCubiertos)
     {
         if (mesesCubiertos < 1)

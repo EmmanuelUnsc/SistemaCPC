@@ -72,6 +72,11 @@ Son inventados. No cargar datos reales del Excel del Colegio.
 | GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Builder |
 | GET | `/api/reportes/estados` | CU-09 Afiliados por estado | Builder |
 | GET | `/api/reportes/matriz` | CU-09 Matriz de afiliados | Builder |
+| GET | `/api/reportes/{tipo}/excel` | CU-09 Descargar en Excel (`defensas`, `estados`, `matriz`) | Builder + Adapter |
+| GET | `/api/defensas` | CU-07 Gestionar defensas (consulta) | |
+| POST | `/api/defensas` | CU-07 Registrar defensa | Chain of Responsibility |
+| POST | `/api/ajustes` | CU-10 Registrar ajuste (solo superadministrador) | Decorator |
+| GET | `/api/ajustes/bitacora` | Bitácora de ajustes | |
 
 Se puede probar en http://localhost:5100/swagger o con `SistemaCPC.Api/SistemaCPC.Api.http`.
 
@@ -86,16 +91,20 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 | Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
 | Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
 | Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` | CU-01 (y cada caso de uso que la Web conecte a la API) |
+| Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 |
+| Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
+| Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |
+| Template Method | `RegistroDePago.Registrar` en `Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
+| Iterator | `foreach` y LINQ de C# en los reportes (`Patrones/Builder/ConstructorReporte.cs`) | CU-09 |
 
-Pendientes, se programan junto con su caso de uso: Decorator (bitácora de CU-10 y de la corrección de CU-05)
-y Adapter (exportación a Excel de CU-09).
+Cada patrón está marcado en el código con un comentario `// Patrón …`.
 
 ## Estado actual
 
 - CU-01 Iniciar sesión funciona de punta a punta: la Web envía los datos a la API, la API los valida
   contra PostgreSQL y la Web abre el panel del rol.
-- La API ya da el estado de cuenta (CU-02) y el saldo de tribunal (CU-03), registra pagos (CU-04 y CU-05)
-  y genera los reportes de CU-09.
+- La API ya da el estado de cuenta (CU-02) y el saldo de tribunal (CU-03), registra pagos (CU-04 y CU-05),
+  registra defensas (CU-07), genera y exporta a Excel los reportes de CU-09 y registra ajustes con bitácora (CU-10).
 - Las pantallas de la Web siguen los mockups de Balsamiq con datos de ejemplo; todavía no llaman a esos endpoints.
 
 ## Base de datos
