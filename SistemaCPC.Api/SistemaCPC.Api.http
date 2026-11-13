@@ -98,3 +98,26 @@ Content-Type: application/json
 
 ### Bitácora
 GET {{SistemaCPC.Api_HostAddress}}/api/ajustes/bitacora
+
+### Decorator, CU-05: corregir un pago (queda en la bitácora)
+PUT {{SistemaCPC.Api_HostAddress}}/api/pagos/R-2001
+Content-Type: application/json
+
+{
+  "mesesCubiertos": 2,
+  "monto": 70,
+  "motivo": "Se cargó 1 mes en vez de 2",
+  "usuario": "dir01"
+}
+
+### Singleton: cambiar los parámetros (la instancia única se recarga)
+PUT {{SistemaCPC.Api_HostAddress}}/api/parametros
+Content-Type: application/json
+
+{
+  "aporteMensual": 35,
+  "montoPorDefensa": 208,
+  "umbralInactividad": 4,
+  "topeDefensasMes": 0,
+  "usuario": "dir01"
+}

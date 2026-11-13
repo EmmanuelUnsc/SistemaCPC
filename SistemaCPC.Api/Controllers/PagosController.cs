@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Models;
+using SistemaCPC.Api.Patrones.Decorator;
 using SistemaCPC.Api.Patrones.FactoryMethod;
 using SistemaCPC.Api.Patrones.Singleton;
 
@@ -20,6 +21,14 @@ public class PagoOficinaSolicitud
     public int MesesCubiertos { get; set; }
 }
 
+public class CorreccionPagoSolicitud
+{
+    public int MesesCubiertos { get; set; }
+    public decimal Monto { get; set; }
+    public string Motivo { get; set; } = string.Empty;
+    public string Usuario { get; set; } = string.Empty;
+}
+
 public record PagoRespuesta(string NumeroRecibo, DateOnly Fecha, decimal Monto, int MesesCubiertos, string Origen);
 
 [ApiController]
@@ -28,11 +37,45 @@ public class PagosController : ControllerBase
 {
     private readonly CpcContext _context;
     private readonly ParametrosSistema _parametros;
+    private readonly IServicioPagos _pagos;
 
-    public PagosController(CpcContext context, ParametrosSistema parametros)
+    public PagosController(CpcContext context, ParametrosSistema parametros, IServicioPagos pagos)
     {
         _context = context;
         _parametros = parametros;
+        _pagos = pagos;
+    }
+
+    [HttpPut("{numeroRecibo}")]
+    public async Task<ActionResult<PagoRespuesta>> Corregir(string numeroRecibo, CorreccionPagoSolicitud solicitud)
+    {
+        if (solicitud.MesesCubiertos < 1 || solicitud.Monto <= 0 || string.IsNullOrWhiteSpace(solicitud.Motivo))
+        {
+            return BadRequest(new { mensaje = "Los meses, el monto y el motivo son obligatorios." });
+        }
+
+        var esDirectorio = await _context.Usuarios.OfType<MiembroDirectorio>().AnyAsync(m => m.Registro == solicitud.Usuario);
+
+        if (!esDirectorio)
+        {
+            return StatusCode(403, new { mensaje = "Solo el directorio corrige pagos." });
+        }
+
+        var pago = await _context.Pagos.FirstOrDefaultAsync(p => p.NumeroRecibo == numeroRecibo);
+
+        if (pago == null)
+        {
+            return NotFound(new { mensaje = "No existe un pago con ese número de recibo." });
+        }
+
+        var afiliado = await _context.Afiliados
+            .Include(a => a.Pagos)
+            .Include(a => a.Ajustes)
+            .FirstAsync(a => a.Id == pago.AfiliadoId);
+
+        var corregido = await _pagos.Corregir(pago, afiliado, solicitud.MesesCubiertos, solicitud.Monto,
+            solicitud.Motivo, solicitud.Usuario);
+        return Ok(Respuesta(corregido));
     }
 
     [HttpGet("{registro}")]

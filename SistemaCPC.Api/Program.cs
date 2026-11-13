@@ -25,8 +25,12 @@ builder.Services.AddScoped<EstadoDeCuenta>();
 
 // Patrón Decorator
 builder.Services.AddScoped<ServicioAjustes>();
-builder.Services.AddScoped<IServicioAjustes>(sp => new ServicioConBitacora(
-    sp.GetRequiredService<ServicioAjustes>(), sp.GetRequiredService<CpcContext>(), sp.GetRequiredService<EstadoDeCuenta>()));
+builder.Services.AddScoped<ServicioPagos>();
+builder.Services.AddScoped(sp => new ServicioConBitacora(
+    sp.GetRequiredService<ServicioAjustes>(), sp.GetRequiredService<ServicioPagos>(),
+    sp.GetRequiredService<CpcContext>(), sp.GetRequiredService<EstadoDeCuenta>()));
+builder.Services.AddScoped<IServicioAjustes>(sp => sp.GetRequiredService<ServicioConBitacora>());
+builder.Services.AddScoped<IServicioPagos>(sp => sp.GetRequiredService<ServicioConBitacora>());
 
 // Patrón Adapter
 builder.Services.AddScoped<IExportador, ExportadorExcel>();

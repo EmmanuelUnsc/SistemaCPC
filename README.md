@@ -64,11 +64,13 @@ Son inventados. No cargar datos reales del Excel del Colegio.
 |---|---|---|---|
 | POST | `/api/auth/login` | CU-01 Iniciar sesión | |
 | GET | `/api/parametros` | Parámetros de los cálculos | Singleton |
+| PUT | `/api/parametros` | Cambiar los parámetros (directorio) | Singleton |
 | GET | `/api/estado-cuenta/{registro}` | CU-02 Consultar estado de cuenta | Facade |
 | GET | `/api/estado-cuenta/{registro}/tribunal` | CU-03 Consultar saldo de tribunal | Facade |
 | GET | `/api/pagos/{registro}` | CU-05 Gestionar pagos (consulta) | |
 | POST | `/api/pagos/plataforma` | CU-04 Pagar aportes (simulado) | Factory Method |
 | POST | `/api/pagos/oficina` | CU-05 Gestionar pagos | Factory Method |
+| PUT | `/api/pagos/{numeroRecibo}` | CU-05 Corregir pago (directorio; queda en la bitácora) | Decorator |
 | GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Builder |
 | GET | `/api/reportes/estados` | CU-09 Afiliados por estado | Builder |
 | GET | `/api/reportes/matriz` | CU-09 Matriz de afiliados | Builder |
@@ -91,7 +93,7 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 | Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
 | Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
 | Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` | CU-01 (y cada caso de uso que la Web conecte a la API) |
-| Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 |
+| Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
 | Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
 | Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |
 | Template Method | `RegistroDePago.Registrar` en `Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
@@ -108,6 +110,8 @@ Cada patrón está marcado en el código con un comentario `// Patrón …`.
 - Las pantallas de la Web siguen los mockups de Balsamiq con datos de ejemplo; todavía no llaman a esos endpoints.
 
 ## Base de datos
+
+- Antes de una demostración, empezar con los datos de prueba limpios: `docker compose down -v` y luego `docker compose up -d`.
 
 - Crear una migración después de cambiar el modelo:
   `dotnet ef migrations add <Nombre> --project SistemaCPC.Api -o Data/Migrations`

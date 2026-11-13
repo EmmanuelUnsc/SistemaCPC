@@ -9,6 +9,11 @@ public interface IServicioAjustes
     Task<Ajuste> Registrar(Ajuste ajuste, Afiliado afiliado, string usuario);
 }
 
+public interface IServicioPagos
+{
+    Task<Pago> Corregir(Pago pago, Afiliado afiliado, int mesesCubiertos, decimal monto, string motivo, string usuario);
+}
+
 public class ServicioAjustes : IServicioAjustes
 {
     private readonly CpcContext _context;
@@ -28,16 +33,36 @@ public class ServicioAjustes : IServicioAjustes
     }
 }
 
-// Patrón Decorator
-public class ServicioConBitacora : IServicioAjustes
+public class ServicioPagos : IServicioPagos
 {
-    private readonly IServicioAjustes _servicio;
+    private readonly CpcContext _context;
+
+    public ServicioPagos(CpcContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Pago> Corregir(Pago pago, Afiliado afiliado, int mesesCubiertos, decimal monto, string motivo, string usuario)
+    {
+        pago.MesesCubiertos = mesesCubiertos;
+        pago.Monto = monto;
+        await _context.SaveChangesAsync();
+        return pago;
+    }
+}
+
+// Patrón Decorator
+public class ServicioConBitacora : IServicioAjustes, IServicioPagos
+{
+    private readonly IServicioAjustes _ajustes;
+    private readonly IServicioPagos _pagos;
     private readonly CpcContext _context;
     private readonly EstadoDeCuenta _estadoDeCuenta;
 
-    public ServicioConBitacora(IServicioAjustes servicio, CpcContext context, EstadoDeCuenta estadoDeCuenta)
+    public ServicioConBitacora(IServicioAjustes ajustes, IServicioPagos pagos, CpcContext context, EstadoDeCuenta estadoDeCuenta)
     {
-        _servicio = servicio;
+        _ajustes = ajustes;
+        _pagos = pagos;
         _context = context;
         _estadoDeCuenta = estadoDeCuenta;
     }
@@ -45,18 +70,31 @@ public class ServicioConBitacora : IServicioAjustes
     public async Task<Ajuste> Registrar(Ajuste ajuste, Afiliado afiliado, string usuario)
     {
         var deudaAnterior = _estadoDeCuenta.Resumir(afiliado).Deuda;
+        var resultado = await _ajustes.Registrar(ajuste, afiliado, usuario);
+        await RegistrarEnBitacora(usuario, $"Ajuste {ajuste.Tipo} ({afiliado.Registro}): {ajuste.Motivo}",
+            deudaAnterior, _estadoDeCuenta.Resumir(afiliado).Deuda);
+        return resultado;
+    }
 
-        var resultado = await _servicio.Registrar(ajuste, afiliado, usuario);
+    public async Task<Pago> Corregir(Pago pago, Afiliado afiliado, int mesesCubiertos, decimal monto, string motivo, string usuario)
+    {
+        var deudaAnterior = _estadoDeCuenta.Resumir(afiliado).Deuda;
+        var resultado = await _pagos.Corregir(pago, afiliado, mesesCubiertos, monto, motivo, usuario);
+        await RegistrarEnBitacora(usuario, $"Corrección del pago {pago.NumeroRecibo} ({afiliado.Registro}): {motivo}",
+            deudaAnterior, _estadoDeCuenta.Resumir(afiliado).Deuda);
+        return resultado;
+    }
 
+    private async Task RegistrarEnBitacora(string usuario, string motivo, decimal valorAnterior, decimal valorNuevo)
+    {
         _context.Bitacora.Add(new RegistroBitacora
         {
             Fecha = DateTime.UtcNow,
             Usuario = usuario,
-            Motivo = $"{ajuste.Tipo} ({afiliado.Registro}): {ajuste.Motivo}",
-            ValorAnterior = deudaAnterior,
-            ValorNuevo = _estadoDeCuenta.Resumir(afiliado).Deuda
+            Motivo = motivo,
+            ValorAnterior = valorAnterior,
+            ValorNuevo = valorNuevo
         });
         await _context.SaveChangesAsync();
-        return resultado;
     }
 }
