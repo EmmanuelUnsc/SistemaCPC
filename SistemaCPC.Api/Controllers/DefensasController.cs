@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
@@ -12,6 +13,9 @@ namespace SistemaCPC.Api.Controllers;
 [Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/defensas")]
+[Produces("application/json")]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public class DefensasController : ControllerBase
 {
     private readonly CpcContext _context;
@@ -24,6 +28,8 @@ public class DefensasController : ControllerBase
     }
 
     [HttpGet]
+    [EndpointSummary("CU-07: defensas registradas, de la más reciente a la más antigua")]
+    [ProducesResponseType<List<DefensaRespuesta>>(StatusCodes.Status200OK)]
     public async Task<List<DefensaRespuesta>> Listar()
     {
         return await _context.Defensas
@@ -34,6 +40,9 @@ public class DefensasController : ControllerBase
     }
 
     [HttpPost]
+    [EndpointSummary("CU-07: registrar una defensa (la valida una cadena: datos completos, oficio único, tribunal habilitado y tope mensual)")]
+    [ProducesResponseType<DefensaRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<DefensaRespuesta>> Registrar(SolicitudDefensa solicitud)
     {
         var cadena = new ValidadorDatosCompletos();
@@ -45,7 +54,7 @@ public class DefensasController : ControllerBase
 
         if (error != null)
         {
-            return BadRequest(new { mensaje = error });
+            return BadRequest(new ErrorRespuesta(error));
         }
 
         var tribunal = await _context.Afiliados.FirstAsync(a => a.Registro == solicitud.RegistroTribunal);
