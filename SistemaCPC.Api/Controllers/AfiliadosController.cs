@@ -56,6 +56,25 @@ public class AfiliadosController : ControllerBase
         return await RespuestaAsync(afiliado);
     }
 
+    [HttpGet("{registro}/pagos")]
+    [EndpointSummary("CU-05: pagos de un afiliado (recurso relacionado)")]
+    [ProducesResponseType<List<PagoRespuesta>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<PagoRespuesta>>> ListarPagos(string registro)
+    {
+        var afiliado = await _context.Afiliados.Include(a => a.Pagos).FirstOrDefaultAsync(a => a.Registro == registro);
+
+        if (afiliado == null)
+        {
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
+        }
+
+        return afiliado.Pagos
+            .OrderByDescending(p => p.Fecha)
+            .Select(p => new PagoRespuesta(p.NumeroRecibo, p.Fecha, p.Monto, p.MesesCubiertos, p.Origen.ToString()))
+            .ToList();
+    }
+
     [HttpPost]
     [EndpointSummary("CU-06: registrar un afiliado con su contraseña inicial")]
     [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status201Created)]
