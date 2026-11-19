@@ -7,9 +7,9 @@
         <h1 class="h3 text-center">Colegio de Profesionales en Comunicación</h1>
         <p class="text-center text-muted mb-4">Ingrese con su número de registro</p>
 
-        @if (ViewData["Error"] != null)
+        @if ((ViewData["Error"] ?? TempData["Error"]) is { } error)
         {
-            <div class="alert alert-danger">@ViewData["Error"]</div>
+            <div class="alert alert-danger">@error</div>
         }
 
         <form asp-action="Login" method="post">

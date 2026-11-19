@@ -49,6 +49,8 @@ public class CuentaController : Controller
             claims.Add(new Claim(ClaimTypes.Role, "Directorio"));
         }
 
+        claims.AddRange(ProxyApi.ClaimsDelToken(usuario));
+
         var identidad = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identidad));
 

@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
-using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Controllers;
@@ -12,9 +12,9 @@ public class ParametrosSolicitud
     public decimal MontoPorDefensa { get; set; }
     public int UmbralInactividad { get; set; }
     public int TopeDefensasMes { get; set; }
-    public string Usuario { get; set; } = string.Empty;
 }
 
+[Authorize]
 [ApiController]
 [Route("api/parametros")]
 public class ParametrosController : ControllerBase
@@ -31,6 +31,7 @@ public class ParametrosController : ControllerBase
     [HttpGet]
     public ParametrosSistema Obtener() => _parametros;
 
+    [Authorize(Roles = "Directorio")]
     [HttpPut]
     public async Task<ActionResult<ParametrosSistema>> Actualizar(ParametrosSolicitud solicitud)
     {
@@ -38,13 +39,6 @@ public class ParametrosController : ControllerBase
             || solicitud.TopeDefensasMes < 0)
         {
             return BadRequest(new { mensaje = "Los valores deben ser positivos; el tope puede ser 0 (sin tope)." });
-        }
-
-        var esDirectorio = await _context.Usuarios.OfType<MiembroDirectorio>().AnyAsync(m => m.Registro == solicitud.Usuario);
-
-        if (!esDirectorio)
-        {
-            return StatusCode(403, new { mensaje = "Solo el directorio cambia los parámetros." });
         }
 
         var guardados = await _context.Parametros.FirstAsync();

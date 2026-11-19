@@ -60,27 +60,41 @@ Son inventados. No cargar datos reales del Excel del Colegio.
 
 ## API
 
-| Método | Ruta | Caso de uso | Patrón |
-|---|---|---|---|
-| POST | `/api/auth/login` | CU-01 Iniciar sesión | |
-| GET | `/api/parametros` | Parámetros de los cálculos | Singleton |
-| PUT | `/api/parametros` | Cambiar los parámetros (directorio) | Singleton |
-| GET | `/api/estado-cuenta/{registro}` | CU-02 Consultar estado de cuenta | Facade |
-| GET | `/api/estado-cuenta/{registro}/tribunal` | CU-03 Consultar saldo de tribunal | Facade |
-| GET | `/api/pagos/{registro}` | CU-05 Gestionar pagos (consulta) | |
-| POST | `/api/pagos/plataforma` | CU-04 Pagar aportes (simulado) | Factory Method |
-| POST | `/api/pagos/oficina` | CU-05 Gestionar pagos | Factory Method |
-| PUT | `/api/pagos/{numeroRecibo}` | CU-05 Corregir pago (directorio; queda en la bitácora) | Decorator |
-| GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Builder |
-| GET | `/api/reportes/estados` | CU-09 Afiliados por estado | Builder |
-| GET | `/api/reportes/matriz` | CU-09 Matriz de afiliados | Builder |
-| GET | `/api/reportes/{tipo}/excel` | CU-09 Descargar en Excel (`defensas`, `estados`, `matriz`) | Builder + Adapter |
-| GET | `/api/defensas` | CU-07 Gestionar defensas (consulta) | |
-| POST | `/api/defensas` | CU-07 Registrar defensa | Chain of Responsibility |
-| POST | `/api/ajustes` | CU-10 Registrar ajuste (solo superadministrador) | Decorator |
-| GET | `/api/ajustes/bitacora` | Bitácora de ajustes | |
+Todas las rutas, salvo el inicio de sesión, piden el token que devuelve `POST /api/auth/login`
+(encabezado `Authorization: Bearer <token>`). El token dura 15 minutos y se renueva con `POST /api/auth/renovar`.
+Un afiliado solo puede ver su propia información (RF-02).
 
-Se puede probar en http://localhost:5100/swagger o con `SistemaCPC.Api/SistemaCPC.Api.http`.
+| Método | Ruta | Caso de uso | Quién | Patrón |
+|---|---|---|---|---|
+| POST | `/api/auth/login` | CU-01 Iniciar sesión (devuelve el token) | Todos | |
+| POST | `/api/auth/renovar` | Renovar el token antes de que venza | Con sesión | |
+| GET | `/api/parametros` | Parámetros de los cálculos | Con sesión | Singleton |
+| PUT | `/api/parametros` | Cambiar los parámetros | Directorio | Singleton |
+| GET | `/api/estado-cuenta/{registro}` | CU-02 Consultar estado de cuenta (meses adeudados por año) | El afiliado o el directorio | Facade |
+| GET | `/api/estado-cuenta/{registro}/tribunal` | CU-03 Consultar saldo de tribunal | El afiliado o el directorio | Facade |
+| GET | `/api/pagos/{registro}` | CU-05 Gestionar pagos (consulta) | El afiliado o el directorio | |
+| POST | `/api/pagos/plataforma` | CU-04 Pagar aportes (simulado, del afiliado que inició sesión) | Afiliado | Factory Method |
+| POST | `/api/pagos/oficina` | CU-05 Registrar el pago de un recibo físico | Directorio | Factory Method |
+| PUT | `/api/pagos/{numeroRecibo}` | CU-05 Corregir pago (queda en la bitácora) | Directorio | Decorator |
+| GET | `/api/afiliados` | CU-06 Gestionar afiliados (lista con estado y deuda) | Directorio | |
+| GET | `/api/afiliados/{registro}` | CU-06 Ver un afiliado | Directorio | |
+| POST | `/api/afiliados` | CU-06 Registrar afiliado (con contraseña inicial) | Directorio | |
+| PUT | `/api/afiliados/{registro}` | CU-06 Actualizar afiliado | Directorio | |
+| POST | `/api/afiliados/{registro}/baja` | CU-06 Registrar baja (RF-25) | Directorio | |
+| PUT / GET | `/api/afiliados/{registro}/foto` | CU-06 Guardar y ver la foto (JPG o PNG, hasta 2 MB) | Directorio | |
+| GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Directorio | Builder |
+| GET | `/api/reportes/estados` | CU-09 Afiliados por estado | Directorio | Builder |
+| GET | `/api/reportes/matriz` | CU-09 Matriz de afiliados | Directorio | Builder |
+| GET | `/api/reportes/{tipo}/excel` | CU-09 Descargar en Excel (`defensas`, `estados`, `matriz`) | Directorio | Builder + Adapter |
+| GET | `/api/defensas` | CU-07 Gestionar defensas (consulta) | Directorio | |
+| POST | `/api/defensas` | CU-07 Registrar defensa | Directorio | Chain of Responsibility |
+| POST | `/api/ajustes` | CU-10 Registrar ajuste | Superadministrador | Decorator |
+| GET | `/api/ajustes/bitacora` | Bitácora de ajustes y correcciones | Directorio | |
+
+Se puede probar en http://localhost:5100/swagger: primero `POST /api/auth/login`, copiar el `token` de la respuesta
+y pegarlo en el botón **Authorize**. También con `SistemaCPC.Api/SistemaCPC.Api.http`, que inicia sesión y usa el token solo.
+
+La clave con la que se firman los tokens está en `SistemaCPC.Api/appsettings.json` (`Token:Clave`) y es solo para desarrollo.
 
 ## Patrones de diseño
 
@@ -92,22 +106,24 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 | Factory Method | `SistemaCPC.Api/Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
 | Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
 | Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
-| Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` | CU-01 (y cada caso de uso que la Web conecte a la API) |
+| Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` (inicio de sesión) y `ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
 | Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
 | Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
 | Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |
-| Template Method | `RegistroDePago.Registrar` en `Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
+| Template Method | `RegistroDePago.Registrar` en `Patrones/FactoryMethod/RegistroDePago.cs` (con la operación gancho `FechaDelPago`) | CU-04 y CU-05 |
 | Iterator | `foreach` y LINQ de C# en los reportes (`Patrones/Builder/ConstructorReporte.cs`) | CU-09 |
 
 Cada patrón está marcado en el código con un comentario `// Patrón …`.
 
 ## Estado actual
 
-- CU-01 Iniciar sesión funciona de punta a punta: la Web envía los datos a la API, la API los valida
-  contra PostgreSQL y la Web abre el panel del rol.
-- La API ya da el estado de cuenta (CU-02) y el saldo de tribunal (CU-03), registra pagos (CU-04 y CU-05),
-  registra defensas (CU-07), genera y exporta a Excel los reportes de CU-09 y registra ajustes con bitácora (CU-10).
-- Las pantallas de la Web siguen los mockups de Balsamiq con datos de ejemplo; todavía no llaman a esos endpoints.
+- Funcionan de punta a punta (Web -> API -> PostgreSQL):
+  - CU-01 Iniciar sesión, con token para la API y sesión que se cierra tras 15 minutos de inactividad (RNF-03).
+  - Afiliado: Mi estado de cuenta (meses adeudados por año, ajustes, total e historial de pagos) y Pagar (pago simulado).
+  - Directorio: Afiliados (registrar, editar, foto y baja) y Pagos (registrar un recibo de oficina y corregir un pago).
+  - Superadministrador: Ajustes, con la bitácora.
+- La API ya registra defensas (CU-07) y genera los reportes de CU-09, pero esas pantallas, la del saldo de tribunal (CU-03)
+  y la de avisos todavía muestran datos de ejemplo (Sprint 3).
 
 ## Base de datos
 

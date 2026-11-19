@@ -19,6 +19,9 @@ public abstract class RegistroDePago
     // Factory Method: método de fábrica
     protected abstract Pago CrearRecibo();
 
+    // Template Method: operación gancho
+    protected virtual DateOnly FechaDelPago() => DateOnly.FromDateTime(DateTime.Today);
+
     // Patrón Template Method: método plantilla
     public async Task<Pago> Registrar(Afiliado afiliado, int mesesCubiertos)
     {
@@ -29,7 +32,7 @@ public abstract class RegistroDePago
 
         var pago = CrearRecibo();
         pago.AfiliadoId = afiliado.Id;
-        pago.Fecha = DateOnly.FromDateTime(DateTime.Today);
+        pago.Fecha = FechaDelPago();
         pago.MesesCubiertos = mesesCubiertos;
         pago.Monto = mesesCubiertos * _parametros.AporteMensual;
 
@@ -54,15 +57,19 @@ public class RegistroPagoPlataforma : RegistroDePago
 public class RegistroPagoOficina : RegistroDePago
 {
     private readonly string _numeroRecibo;
+    private readonly DateOnly? _fecha;
 
-    public RegistroPagoOficina(CpcContext context, ParametrosSistema parametros, string numeroRecibo)
+    public RegistroPagoOficina(CpcContext context, ParametrosSistema parametros, string numeroRecibo, DateOnly? fecha)
         : base(context, parametros)
     {
         _numeroRecibo = numeroRecibo;
+        _fecha = fecha;
     }
 
     protected override Pago CrearRecibo()
     {
         return new Pago { NumeroRecibo = _numeroRecibo, Origen = OrigenPago.Oficina };
     }
+
+    protected override DateOnly FechaDelPago() => _fecha ?? base.FechaDelPago();
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
@@ -9,6 +10,7 @@ namespace SistemaCPC.Api.Controllers;
 
 public record DefensaRespuesta(string NumeroOficio, string Universidad, DateOnly Fecha, string Tribunal, string Estado);
 
+[Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/defensas")]
 public class DefensasController : ControllerBase

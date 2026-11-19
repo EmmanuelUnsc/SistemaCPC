@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
@@ -12,13 +13,13 @@ public class AjusteSolicitud
     public string Tipo { get; set; } = string.Empty;
     public decimal Monto { get; set; }
     public string Motivo { get; set; } = string.Empty;
-    public string Superadministrador { get; set; } = string.Empty;
 }
 
 public record AjusteRespuesta(string Tipo, decimal Monto, string Motivo, DateOnly Fecha);
 
 public record RegistroBitacoraRespuesta(DateTime Fecha, string Usuario, string Motivo, decimal ValorAnterior, decimal ValorNuevo);
 
+[Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/ajustes")]
 public class AjustesController : ControllerBase
@@ -32,21 +33,17 @@ public class AjustesController : ControllerBase
         _ajustes = ajustes;
     }
 
+    [Authorize(Roles = "Superadministrador")]
     [HttpPost]
     public async Task<ActionResult<AjusteRespuesta>> Registrar(AjusteSolicitud solicitud)
     {
-        if (string.IsNullOrWhiteSpace(solicitud.Tipo) || string.IsNullOrWhiteSpace(solicitud.Motivo))
+        if (string.IsNullOrWhiteSpace(solicitud.Tipo) || string.IsNullOrWhiteSpace(solicitud.Motivo) || solicitud.Monto == 0)
         {
-            return BadRequest(new { mensaje = "El tipo y el motivo son obligatorios." });
+            return BadRequest(new { mensaje = "El tipo, el monto y el motivo son obligatorios." });
         }
 
         var superadministrador = await _context.Usuarios.OfType<Superadministrador>()
-            .FirstOrDefaultAsync(u => u.Registro == solicitud.Superadministrador);
-
-        if (superadministrador == null)
-        {
-            return StatusCode(403, new { mensaje = "Solo el superadministrador registra ajustes." });
-        }
+            .FirstAsync(u => u.Registro == User.Identity!.Name);
 
         var afiliado = await _context.Afiliados
             .Include(a => a.Pagos)

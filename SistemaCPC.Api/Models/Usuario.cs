@@ -52,17 +52,29 @@ public class Afiliado : Usuario
 
     public int MesesTranscurridos(DateOnly hoy)
     {
-        if (hoy < FechaInicioCobro)
+        var fin = FechaBaja != null && FechaBaja < hoy ? FechaBaja.Value : hoy;
+
+        if (fin < FechaInicioCobro)
         {
             return 0;
         }
 
-        return (hoy.Year - FechaInicioCobro.Year) * 12 + hoy.Month - FechaInicioCobro.Month + 1;
+        return (fin.Year - FechaInicioCobro.Year) * 12 + fin.Month - FechaInicioCobro.Month + 1;
     }
 
     public int MesesAdeudados(DateOnly hoy)
     {
         return Math.Max(0, MesesTranscurridos(hoy) - Pagos.Sum(p => p.MesesCubiertos));
+    }
+
+    public List<DateOnly> ListarMesesAdeudados(DateOnly hoy)
+    {
+        var primerMes = new DateOnly(FechaInicioCobro.Year, FechaInicioCobro.Month, 1);
+        var cubiertos = Pagos.Sum(p => p.MesesCubiertos);
+
+        return Enumerable.Range(cubiertos, MesesAdeudados(hoy))
+            .Select(primerMes.AddMonths)
+            .ToList();
     }
 
     public decimal CalcularDeuda(decimal aporteMensual, DateOnly hoy)
@@ -77,7 +89,7 @@ public class Afiliado : Usuario
             return MotivoBaja == "Fallecimiento" ? EstadoAfiliado.Fallecido : EstadoAfiliado.Renunciado;
         }
 
-        return MesesAdeudados(hoy) >= umbralInactividad ? EstadoAfiliado.Inactivo : EstadoAfiliado.Activo;
+        return MesesAdeudados(hoy) > umbralInactividad ? EstadoAfiliado.Inactivo : EstadoAfiliado.Activo;
     }
 }
 

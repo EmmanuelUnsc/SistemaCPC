@@ -1,35 +1,71 @@
+@model EstadoCuenta?
 @{
     ViewData["Title"] = "Mi estado de cuenta";
+    string Rango(List<string> meses) => meses.Count == 1 ? meses[0] : $"{meses[0]} a {meses[^1]}";
 }
 
 <h1>Mi estado de cuenta</h1>
 
-<p>Estado: Activo &nbsp;|&nbsp; Deuda total: Bs 105</p>
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
 
-<div class="row">
-    <div class="col-md-8">
-        <h2 class="h6">Meses adeudados</h2>
-        <table class="table table-sm table-striped">
-            <thead><tr><th>Año</th><th>Meses</th><th>Monto</th></tr></thead>
-            <tbody><tr><td>2026</td><td>Agosto a Octubre</td><td>Bs 105</td></tr></tbody>
-        </table>
+@if (Model != null)
+{
+    <p>Estado: <strong>@Model.Estado</strong> &nbsp;|&nbsp; Deuda total: <strong>@Formato.Bs(Model.Deuda)</strong></p>
 
-        <h2 class="h6">Historial de pagos</h2>
-        <table class="table table-sm table-striped">
-            <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th></tr></thead>
-            <tbody>
-                <tr><td>R-1021</td><td>05/08/2026</td><td>Bs 105</td><td>3</td></tr>
-                <tr><td>R-0990</td><td>02/05/2026</td><td>Bs 105</td><td>3</td></tr>
-            </tbody>
-        </table>
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="h6">Meses adeudados</h2>
+            @if (Model.MesesPorAnio.Count == 0)
+            {
+                <p class="text-muted">No tiene meses adeudados.</p>
+            }
+            else
+            {
+                <table class="table table-sm table-striped">
+                    <thead><tr><th>Año</th><th>Meses</th><th>Monto</th></tr></thead>
+                    <tbody>
+                        @foreach (var anio in Model.MesesPorAnio)
+                        {
+                            <tr><td>@anio.Anio</td><td>@Rango(anio.Meses) (@anio.Meses.Count)</td><td>@Formato.Bs(anio.Monto)</td></tr>
+                        }
+                        @if (Model.Ajustes != 0)
+                        {
+                            <tr><td colspan="2">Ajustes</td><td>- @Formato.Bs(Model.Ajustes)</td></tr>
+                        }
+                    </tbody>
+                    <tfoot><tr><th colspan="2">Total</th><th>@Formato.Bs(Model.Deuda)</th></tr></tfoot>
+                </table>
+            }
+
+            <h2 class="h6">Historial de pagos</h2>
+            @if (Model.Pagos.Count == 0)
+            {
+                <p class="text-muted">Todavía no hay pagos registrados.</p>
+            }
+            else
+            {
+                <table class="table table-sm table-striped">
+                    <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th></tr></thead>
+                    <tbody>
+                        @foreach (var pago in Model.Pagos)
+                        {
+                            <tr><td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td><td>@pago.MesesCubiertos</td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-primary w-100 mb-4" asp-action="Pagar">Pagar mi deuda</a>
+
+            <h2 class="h6">Avisos vigentes</h2>
+            <table class="table table-sm table-striped">
+                <thead><tr><th>Aviso</th><th>Vence</th></tr></thead>
+                <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
+            </table>
+        </div>
     </div>
-    <div class="col-md-4">
-        <a class="btn btn-primary w-100 mb-4" asp-action="Pagar">Pagar mi deuda</a>
-
-        <h2 class="h6">Avisos vigentes</h2>
-        <table class="table table-sm table-striped">
-            <thead><tr><th>Aviso</th><th>Vence</th></tr></thead>
-            <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
-        </table>
-    </div>
-</div>
+}

@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaCPC.Api.Patrones.Facade;
+using SistemaCPC.Api.Seguridad;
 
 namespace SistemaCPC.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/estado-cuenta")]
 public class EstadoCuentaController : ControllerBase
@@ -17,6 +20,11 @@ public class EstadoCuentaController : ControllerBase
     [HttpGet("{registro}")]
     public async Task<ActionResult<EstadoCuentaRespuesta>> Obtener(string registro)
     {
+        if (!User.PuedeVer(registro))
+        {
+            return StatusCode(403, new { mensaje = "Solo puede ver su propia información." });
+        }
+
         var estado = await _estadoDeCuenta.ObtenerEstado(registro);
 
         if (estado == null)
@@ -30,6 +38,11 @@ public class EstadoCuentaController : ControllerBase
     [HttpGet("{registro}/tribunal")]
     public async Task<ActionResult<SaldoTribunalRespuesta>> SaldoTribunal(string registro)
     {
+        if (!User.PuedeVer(registro))
+        {
+            return StatusCode(403, new { mensaje = "Solo puede ver su propia información." });
+        }
+
         var saldo = await _estadoDeCuenta.ObtenerSaldoTribunal(registro);
 
         if (saldo == null)

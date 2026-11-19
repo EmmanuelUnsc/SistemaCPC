@@ -15,6 +15,7 @@ public class CpcContext : DbContext
     public DbSet<Parametros> Parametros => Set<Parametros>();
     public DbSet<Ajuste> Ajustes => Set<Ajuste>();
     public DbSet<RegistroBitacora> Bitacora => Set<RegistroBitacora>();
+    public DbSet<FotoAfiliado> FotosAfiliados => Set<FotoAfiliado>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,5 +36,10 @@ public class CpcContext : DbContext
         modelBuilder.Entity<Pago>().HasIndex(p => p.NumeroRecibo).IsUnique();
         modelBuilder.Entity<Pago>().Property(p => p.Origen).HasConversion<string>();
         modelBuilder.Entity<Defensa>().Property(d => d.Estado).HasConversion<string>();
+
+        modelBuilder.Entity<FotoAfiliado>()
+            .HasOne(f => f.Afiliado)
+            .WithOne()
+            .HasForeignKey<FotoAfiliado>(f => f.AfiliadoId);
     }
 }

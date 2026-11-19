@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Patrones.Adapter;
@@ -7,6 +8,7 @@ using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Controllers;
 
+[Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/reportes")]
 public class ReportesController : ControllerBase

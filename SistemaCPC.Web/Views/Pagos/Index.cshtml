@@ -1,60 +1,98 @@
+@model PantallaPagos
 @{
     ViewData["Title"] = "Gestionar pagos";
+    var hoy = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
 }
 
 <h1>Gestionar pagos</h1>
 
-<div class="row g-2 align-items-end mb-3">
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
     <div class="col-md-4">
-        <label class="form-label">Número de registro</label>
-        <input class="form-control" value="0457" />
+        <label class="form-label" for="registro">Número de registro</label>
+        <input class="form-control" id="registro" name="registro" value="@Model.Registro" required />
     </div>
     <div class="col-md-2">
-        <button type="button" class="btn btn-primary">Buscar</button>
+        <button type="submit" class="btn btn-primary">Buscar</button>
     </div>
-</div>
+</form>
 
-<p>Afiliado: Nombre Apellido &nbsp;|&nbsp; Deuda: Bs 105</p>
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="row g-2">
-            <div class="col-6">
-                <label class="form-label" for="f-recibo">Número de recibo</label>
-                <input class="form-control" id="f-recibo" value="R-1022" />
+@if (Model.Afiliado is { } afiliado)
+{
+    <p>Afiliado: <strong>@afiliado.Nombre</strong> (@afiliado.Registro) &nbsp;|&nbsp; Estado: @afiliado.Estado
+        &nbsp;|&nbsp; Deuda: <strong>@Formato.Bs(afiliado.Deuda)</strong></p>
+
+    <form method="post" id="formulario-pago">
+        <input type="hidden" name="registro" value="@afiliado.Registro" />
+        <input type="hidden" name="aporte" id="aporte" value="@afiliado.AporteMensual" />
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label" for="f-recibo">Número de recibo</label>
+                        <input class="form-control" id="f-recibo" name="numeroRecibo" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="f-fecha">Fecha</label>
+                        <input type="date" class="form-control" id="f-fecha" name="fecha" value="@hoy" max="@hoy" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="f-meses">Meses cubiertos</label>
+                        <input type="number" class="form-control" id="f-meses" name="mesesCubiertos" min="1" max="120" value="1" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="f-monto">Monto (Bs)</label>
+                        <input class="form-control" id="f-monto" value="@afiliado.AporteMensual.ToString("0.##")" readonly />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="f-motivo">Motivo (solo para corregir)</label>
+                        <input class="form-control" id="f-motivo" name="motivo" />
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success" asp-action="Registrar">Registrar pago</button>
+                        <button type="button" class="btn btn-outline-secondary" data-limpiar>Nuevo pago</button>
+                    </div>
+                </div>
             </div>
-            <div class="col-6">
-                <label class="form-label" for="f-fecha">Fecha</label>
-                <input type="date" class="form-control" id="f-fecha" value="2026-10-25" />
-            </div>
-            <div class="col-6">
-                <label class="form-label" for="f-monto">Monto (Bs)</label>
-                <input class="form-control" id="f-monto" value="105" />
-            </div>
-            <div class="col-6">
-                <label class="form-label" for="f-meses">Meses cubiertos</label>
-                <input class="form-control" id="f-meses" value="3" />
-            </div>
-            <div class="col-12">
-                <button type="button" class="btn btn-success">Registrar pago</button>
-                <button type="button" class="btn btn-outline-secondary" data-limpiar>Nuevo pago</button>
+            <div class="col-md-6">
+                <h2 class="h6">Pagos registrados</h2>
+                @if (Model.Pagos.Count == 0)
+                {
+                    <p class="text-muted">Todavía no hay pagos registrados.</p>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped seleccionable">
+                        <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th><th>Origen</th></tr></thead>
+                        <tbody>
+                            @foreach (var pago in Model.Pagos)
+                            {
+                                <tr data-recibo="@pago.NumeroRecibo" data-fecha="@pago.Fecha.ToString("yyyy-MM-dd")"
+                                    data-monto="@pago.Monto.ToString("0.##")" data-meses="@pago.MesesCubiertos">
+                                    <td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td>
+                                    <td>@pago.MesesCubiertos</td><td>@pago.Origen</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                <button type="submit" class="btn btn-outline-primary" asp-action="Corregir">Corregir pago</button>
+                <p class="text-muted small mt-2">Elija el pago en la tabla, cambie los meses y escriba el motivo. Cada corrección queda en la bitácora.</p>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <h2 class="h6">Pagos registrados</h2>
-        <table class="table table-sm table-striped seleccionable">
-            <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th></tr></thead>
-            <tbody>
-                <tr data-recibo="R-1021" data-fecha="2026-08-05" data-monto="105" data-meses="3">
-                    <td>R-1021</td><td>05/08/2026</td><td>Bs 105</td>
-                </tr>
-                <tr data-recibo="R-0990" data-fecha="2026-05-02" data-monto="105" data-meses="3">
-                    <td>R-0990</td><td>02/05/2026</td><td>Bs 105</td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" class="btn btn-outline-primary">Corregir pago</button>
-        <p class="text-muted small mt-2">Cada corrección queda en la bitácora.</p>
-    </div>
-</div>
+    </form>
+}
+
+@section Scripts {
+    <script>
+        const campoMeses = document.getElementById("f-meses");
+        campoMeses?.addEventListener("input", () => {
+            const aporte = Number(document.getElementById("aporte").value);
+            document.getElementById("f-monto").value = (Number(campoMeses.value) || 0) * aporte;
+        });
+    </script>
+}

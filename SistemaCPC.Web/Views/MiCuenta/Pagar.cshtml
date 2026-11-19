@@ -1,19 +1,51 @@
+@model EstadoCuenta?
 @{
     ViewData["Title"] = "Pagar aportes";
+    var meses = Model == null ? 1 : Math.Max(1, Model.MesesAdeudados);
 }
 
 <h1>Pagar aportes</h1>
 
-<p>Monto a pagar: Bs 105 (agosto a octubre de 2026)</p>
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
 
-<div class="row g-4 align-items-start">
-    <div class="col-md-4">
-        <div class="border rounded d-flex align-items-center justify-content-center text-muted" style="height: 220px;">QR de prueba</div>
+@if (Model != null)
+{
+    <p>Deuda actual: <strong>@Formato.Bs(Model.Deuda)</strong> (@Model.MesesAdeudados meses) &nbsp;|&nbsp; Aporte mensual: @Formato.Bs(Model.AporteMensual)</p>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-md-4">
+            <div class="border rounded d-flex align-items-center justify-content-center text-muted" style="height: 220px;">QR de prueba</div>
+        </div>
+        <div class="col-md-8">
+            <form asp-action="Pagar" method="post">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label" for="meses">Meses a pagar</label>
+                        <input type="number" class="form-control" id="meses" name="mesesCubiertos" min="1" max="120" value="@meses"
+                               data-aporte="@Model.AporteMensual" required />
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <p class="mb-2">Monto: <strong id="monto">@Formato.Bs(meses * Model.AporteMensual)</strong></p>
+                    </div>
+                </div>
+                <p>Pago simulado: no se mueve dinero real.</p>
+                <p>Al confirmar, se genera el recibo y el saldo se actualiza.</p>
+                <button type="submit" class="btn btn-success me-2">Confirmar pago</button>
+                <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+            </form>
+        </div>
     </div>
-    <div class="col-md-8">
-        <p>Pago simulado: no se mueve dinero real.</p>
-        <p>Al confirmar, se genera el recibo y el saldo se actualiza.</p>
-        <button type="button" class="btn btn-success me-2">Confirmar pago</button>
-        <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
-    </div>
-</div>
+}
+
+@section Scripts {
+    <script>
+        const campoMeses = document.getElementById("meses");
+        campoMeses?.addEventListener("input", () => {
+            const total = (Number(campoMeses.value) || 0) * Number(campoMeses.dataset.aporte);
+            document.getElementById("monto").textContent = "Bs " + total;
+        });
+    </script>
+}

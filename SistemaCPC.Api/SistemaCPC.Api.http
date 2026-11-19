@@ -1,6 +1,7 @@
 @SistemaCPC.Api_HostAddress = http://localhost:5100
 
-### CU-01 Iniciar sesión: correcto (200)
+### CU-01 Iniciar sesión como directorio (devuelve el token)
+# @name directorio
 POST {{SistemaCPC.Api_HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -9,7 +10,27 @@ Content-Type: application/json
   "contrasena": "dir123"
 }
 
-### CU-01 Iniciar sesión: contraseña incorrecta (401)
+### CU-01 Iniciar sesión como afiliado
+# @name afiliado
+POST {{SistemaCPC.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "registro": "0458",
+  "contrasena": "0458"
+}
+
+### CU-01 Iniciar sesión como superadministrador
+# @name admin
+POST {{SistemaCPC.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "registro": "admin",
+  "contrasena": "admin123"
+}
+
+### CU-01 Contraseña incorrecta (401)
 POST {{SistemaCPC.Api_HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -18,51 +39,115 @@ Content-Type: application/json
   "contrasena": "otra"
 }
 
+### RF-02 Sin token (401)
+GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0458
+
+### RF-02 El afiliado pide datos de otro registro (403)
+GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0457
+Authorization: Bearer {{afiliado.response.body.$.token}}
+
+### Renovar el token antes de que venza (15 min)
+POST {{SistemaCPC.Api_HostAddress}}/api/auth/renovar
+Authorization: Bearer {{afiliado.response.body.$.token}}
+
 ### Singleton: parámetros del sistema
 GET {{SistemaCPC.Api_HostAddress}}/api/parametros
+Authorization: Bearer {{directorio.response.body.$.token}}
 
-### Facade, CU-02: estado de cuenta
-GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0457
+### Facade, CU-02: estado de cuenta con los meses adeudados por año
+GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0458
+Authorization: Bearer {{afiliado.response.body.$.token}}
 
 ### Facade, CU-03: saldo de tribunal
 GET {{SistemaCPC.Api_HostAddress}}/api/estado-cuenta/0457/tribunal
+Authorization: Bearer {{directorio.response.body.$.token}}
 
-### Factory Method, CU-04: pago simulado en la plataforma (el sistema numera el recibo)
+### Factory Method, CU-04: pago simulado del afiliado que inició sesión
 POST {{SistemaCPC.Api_HostAddress}}/api/pagos/plataforma
+Authorization: Bearer {{afiliado.response.body.$.token}}
 Content-Type: application/json
 
 {
-  "registro": "0458",
   "mesesCubiertos": 3
 }
 
-### Factory Method, CU-05: pago recibido en la oficina (número del recibo físico)
+### Factory Method, CU-05: pago recibido en la oficina (número y fecha del recibo físico)
 POST {{SistemaCPC.Api_HostAddress}}/api/pagos/oficina
+Authorization: Bearer {{directorio.response.body.$.token}}
 Content-Type: application/json
 
 {
   "registro": "0458",
   "numeroRecibo": "R-2001",
+  "fecha": "2026-11-15",
   "mesesCubiertos": 2
 }
 
 ### Pagos registrados de un afiliado
 GET {{SistemaCPC.Api_HostAddress}}/api/pagos/0458
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### CU-06: lista de afiliados con estado y deuda
+GET {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### CU-06: registrar afiliado (puede iniciar sesión con la contraseña inicial)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0459",
+  "nombre": "Afiliado de prueba 3",
+  "carnet": "1000003",
+  "fechaAfiliacion": "2026-06-10",
+  "fechaInicioCobro": "2026-07-01",
+  "esTribunal": false,
+  "contrasena": "clave0459"
+}
+
+### CU-06: actualizar afiliado (sin contraseña, no se cambia)
+PUT {{SistemaCPC.Api_HostAddress}}/api/afiliados/0459
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "nombre": "Afiliado de prueba 3",
+  "carnet": "1000003",
+  "fechaAfiliacion": "2026-06-10",
+  "fechaInicioCobro": "2026-07-01",
+  "esTribunal": true
+}
+
+### CU-06, RF-25: registrar baja (desde esa fecha no se suman aportes)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados/0459/baja
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "motivo": "Renuncia",
+  "fecha": "2026-11-15"
+}
 
 ### Builder, CU-09: defensas del período
 GET {{SistemaCPC.Api_HostAddress}}/api/reportes/defensas?desde=2026-01-01&hasta=2026-12-31
+Authorization: Bearer {{directorio.response.body.$.token}}
 
 ### Builder, CU-09: afiliados por estado
 GET {{SistemaCPC.Api_HostAddress}}/api/reportes/estados
+Authorization: Bearer {{directorio.response.body.$.token}}
 
 ### Builder, CU-09: matriz de afiliados
 GET {{SistemaCPC.Api_HostAddress}}/api/reportes/matriz
+Authorization: Bearer {{directorio.response.body.$.token}}
 
 ### Adapter, CU-09: matriz de afiliados en Excel
 GET {{SistemaCPC.Api_HostAddress}}/api/reportes/matriz/excel
+Authorization: Bearer {{directorio.response.body.$.token}}
 
 ### Chain of Responsibility, CU-07: registrar defensa
 POST {{SistemaCPC.Api_HostAddress}}/api/defensas
+Authorization: Bearer {{directorio.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -75,6 +160,7 @@ Content-Type: application/json
 
 ### Chain of Responsibility, CU-07: tribunal no habilitado (400)
 POST {{SistemaCPC.Api_HostAddress}}/api/defensas
+Authorization: Bearer {{directorio.response.body.$.token}}
 Content-Type: application/json
 
 {
@@ -84,40 +170,41 @@ Content-Type: application/json
   "registroTribunal": "0458"
 }
 
-### Decorator, CU-10: registrar ajuste (queda en la bitácora)
+### Decorator, CU-10: registrar ajuste (solo superadministrador; queda en la bitácora)
 POST {{SistemaCPC.Api_HostAddress}}/api/ajustes
+Authorization: Bearer {{admin.response.body.$.token}}
 Content-Type: application/json
 
 {
   "registro": "0458",
   "tipo": "Recibo faltante",
   "monto": 35,
-  "motivo": "Mes omitido en la carga",
-  "superadministrador": "admin"
+  "motivo": "Mes omitido en la carga"
 }
 
 ### Bitácora
 GET {{SistemaCPC.Api_HostAddress}}/api/ajustes/bitacora
+Authorization: Bearer {{directorio.response.body.$.token}}
 
-### Decorator, CU-05: corregir un pago (queda en la bitácora)
+### Decorator, CU-05: corregir un pago (queda en la bitácora con el usuario del token)
 PUT {{SistemaCPC.Api_HostAddress}}/api/pagos/R-2001
+Authorization: Bearer {{directorio.response.body.$.token}}
 Content-Type: application/json
 
 {
   "mesesCubiertos": 2,
   "monto": 70,
-  "motivo": "Se cargó 1 mes en vez de 2",
-  "usuario": "dir01"
+  "motivo": "Se cargó 1 mes en vez de 2"
 }
 
-### Singleton: cambiar los parámetros (la instancia única se recarga)
+### Singleton: cambiar los parámetros (solo directorio; la instancia única se recarga)
 PUT {{SistemaCPC.Api_HostAddress}}/api/parametros
+Authorization: Bearer {{directorio.response.body.$.token}}
 Content-Type: application/json
 
 {
   "aporteMensual": 35,
   "montoPorDefensa": 208,
   "umbralInactividad": 4,
-  "topeDefensasMes": 0,
-  "usuario": "dir01"
+  "topeDefensasMes": 0
 }

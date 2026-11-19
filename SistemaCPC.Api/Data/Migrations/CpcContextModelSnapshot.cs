@@ -101,6 +101,25 @@ namespace SistemaCPC.Api.Data.Migrations
                     b.ToTable("Defensas");
                 });
 
+            modelBuilder.Entity("SistemaCPC.Api.Models.FotoAfiliado", b =>
+                {
+                    b.Property<int>("AfiliadoId")
+                        .HasColumnType("integer");
+
+                    b.Property<byte[]>("Datos")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("AfiliadoId");
+
+                    b.ToTable("FotosAfiliados");
+                });
+
             modelBuilder.Entity("SistemaCPC.Api.Models.Pago", b =>
                 {
                     b.Property<int>("Id")
@@ -321,6 +340,17 @@ namespace SistemaCPC.Api.Data.Migrations
                     b.HasOne("SistemaCPC.Api.Models.Afiliado", "Afiliado")
                         .WithMany("Defensas")
                         .HasForeignKey("AfiliadoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Afiliado");
+                });
+
+            modelBuilder.Entity("SistemaCPC.Api.Models.FotoAfiliado", b =>
+                {
+                    b.HasOne("SistemaCPC.Api.Models.Afiliado", "Afiliado")
+                        .WithOne()
+                        .HasForeignKey("SistemaCPC.Api.Models.FotoAfiliado", "AfiliadoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
