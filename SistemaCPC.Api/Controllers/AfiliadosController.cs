@@ -132,6 +132,35 @@ public class AfiliadosController : ControllerBase
         return await RespuestaAsync(afiliado);
     }
 
+    [HttpDelete("{registro}")]
+    [EndpointSummary("CU-06: eliminar un afiliado cargado por error (solo si no tiene pagos, defensas ni ajustes)")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Eliminar(string registro)
+    {
+        var afiliado = await _context.Afiliados
+            .Include(a => a.Pagos)
+            .Include(a => a.Defensas)
+            .Include(a => a.Ajustes)
+            .FirstOrDefaultAsync(a => a.Registro == registro);
+
+        if (afiliado == null)
+        {
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
+        }
+
+        if (afiliado.Pagos.Count > 0 || afiliado.Defensas.Count > 0 || afiliado.Ajustes.Count > 0)
+        {
+            return Conflict(new ErrorRespuesta("El afiliado tiene pagos, defensas o ajustes: no se puede eliminar. Registre su baja con POST /api/afiliados/{registro}/baja."));
+        }
+
+        _context.Afiliados.Remove(afiliado);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     [HttpPost("{registro}/baja")]
     [EndpointSummary("CU-06, RF-25: registrar la baja por renuncia o fallecimiento; desde esa fecha no se suman aportes")]
     [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status200OK)]
