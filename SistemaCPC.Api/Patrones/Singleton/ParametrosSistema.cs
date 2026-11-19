@@ -1,3 +1,4 @@
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 
 namespace SistemaCPC.Api.Patrones.Singleton;

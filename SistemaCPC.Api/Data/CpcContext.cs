@@ -17,6 +17,11 @@ public class CpcContext : DbContext
     public DbSet<RegistroBitacora> Bitacora => Set<RegistroBitacora>();
     public DbSet<FotoAfiliado> FotosAfiliados => Set<FotoAfiliado>();
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configuracion)
+    {
+        configuracion.Properties<decimal>().HavePrecision(12, 2);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -35,7 +40,15 @@ public class CpcContext : DbContext
 
         modelBuilder.Entity<Pago>().HasIndex(p => p.NumeroRecibo).IsUnique();
         modelBuilder.Entity<Pago>().Property(p => p.Origen).HasConversion<string>();
-        modelBuilder.Entity<Defensa>().Property(d => d.Estado).HasConversion<string>();
+        modelBuilder.Entity<Defensa>().Property(d => d.Estado).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<Pago>().Property(p => p.Origen).HasMaxLength(20);
+        modelBuilder.Entity<Usuario>().Property(u => u.Rol).HasMaxLength(30);
+
+        modelBuilder.Entity<Ajuste>()
+            .HasOne(a => a.Superadministrador)
+            .WithMany()
+            .HasForeignKey(a => a.SuperadministradorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<FotoAfiliado>()
             .HasOne(f => f.Afiliado)

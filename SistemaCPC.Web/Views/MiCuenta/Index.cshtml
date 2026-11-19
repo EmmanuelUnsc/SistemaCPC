@@ -13,7 +13,16 @@
 
 @if (Model != null)
 {
-    <p>Estado: <strong>@Model.Estado</strong> &nbsp;|&nbsp; Deuda total: <strong>@Formato.Bs(Model.Deuda)</strong></p>
+    <p>Estado: <strong>@Model.Estado</strong> &nbsp;|&nbsp;
+        @if (Model.Deuda < 0)
+        {
+            <span>Saldo a favor: <strong>@Formato.Bs(-Model.Deuda)</strong></span>
+        }
+        else
+        {
+            <span>Deuda total: <strong>@Formato.Bs(Model.Deuda)</strong></span>
+        }
+    </p>
 
     <div class="row">
         <div class="col-md-8">
@@ -30,10 +39,6 @@
                         @foreach (var anio in Model.MesesPorAnio)
                         {
                             <tr><td>@anio.Anio</td><td>@Rango(anio.Meses) (@anio.Meses.Count)</td><td>@Formato.Bs(anio.Monto)</td></tr>
-                        }
-                        @if (Model.Ajustes != 0)
-                        {
-                            <tr><td colspan="2">Ajustes</td><td>- @Formato.Bs(Model.Ajustes)</td></tr>
                         }
                     </tbody>
                     <tfoot><tr><th colspan="2">Total</th><th>@Formato.Bs(Model.Deuda)</th></tr></tfoot>

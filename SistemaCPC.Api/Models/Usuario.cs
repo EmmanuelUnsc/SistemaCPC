@@ -62,34 +62,39 @@ public class Afiliado : Usuario
         return (fin.Year - FechaInicioCobro.Year) * 12 + fin.Month - FechaInicioCobro.Month + 1;
     }
 
-    public int MesesAdeudados(DateOnly hoy)
+    public decimal CalcularDeuda(decimal aporteMensual, DateOnly hoy)
     {
-        return Math.Max(0, MesesTranscurridos(hoy) - Pagos.Sum(p => p.MesesCubiertos));
+        return MesesTranscurridos(hoy) * aporteMensual - Pagos.Sum(p => p.Monto) - Ajustes.Sum(a => a.Monto);
     }
 
-    public List<DateOnly> ListarMesesAdeudados(DateOnly hoy)
+    public int MesesAdeudados(decimal aporteMensual, DateOnly hoy)
     {
-        var primerMes = new DateOnly(FechaInicioCobro.Year, FechaInicioCobro.Month, 1);
-        var cubiertos = Pagos.Sum(p => p.MesesCubiertos);
+        var deuda = CalcularDeuda(aporteMensual, hoy);
+        return deuda <= 0 || aporteMensual <= 0 ? 0 : (int)Math.Ceiling(deuda / aporteMensual);
+    }
 
-        return Enumerable.Range(cubiertos, MesesAdeudados(hoy))
-            .Select(primerMes.AddMonths)
+    public List<(DateOnly Mes, decimal Monto)> ListarMesesAdeudados(decimal aporteMensual, DateOnly hoy)
+    {
+        var deuda = CalcularDeuda(aporteMensual, hoy);
+        var cantidad = MesesAdeudados(aporteMensual, hoy);
+        var fin = FechaBaja != null && FechaBaja < hoy ? FechaBaja.Value : hoy;
+        var ultimoMes = new DateOnly(fin.Year, fin.Month, 1);
+
+        return Enumerable.Range(0, cantidad)
+            .Select(i => (ultimoMes.AddMonths(i - cantidad + 1), i == 0 ? deuda - (cantidad - 1) * aporteMensual : aporteMensual))
             .ToList();
     }
 
-    public decimal CalcularDeuda(decimal aporteMensual, DateOnly hoy)
-    {
-        return Math.Max(0, MesesAdeudados(hoy) * aporteMensual - Ajustes.Sum(a => a.Monto));
-    }
-
-    public EstadoAfiliado ObtenerEstado(int umbralInactividad, DateOnly hoy)
+    public EstadoAfiliado ObtenerEstado(int umbralInactividad, decimal aporteMensual, DateOnly hoy)
     {
         if (FechaBaja != null)
         {
             return MotivoBaja == "Fallecimiento" ? EstadoAfiliado.Fallecido : EstadoAfiliado.Renunciado;
         }
 
-        return MesesAdeudados(hoy) > umbralInactividad ? EstadoAfiliado.Inactivo : EstadoAfiliado.Activo;
+        return CalcularDeuda(aporteMensual, hoy) > umbralInactividad * aporteMensual
+            ? EstadoAfiliado.Inactivo
+            : EstadoAfiliado.Activo;
     }
 }
 

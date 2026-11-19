@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SistemaCPC.Api.Models;
+namespace SistemaCPC.Api.Dtos;
 
 public class LoginSolicitud
 {

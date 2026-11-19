@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Patrones.Facade;
 using SistemaCPC.Api.Patrones.Singleton;
 

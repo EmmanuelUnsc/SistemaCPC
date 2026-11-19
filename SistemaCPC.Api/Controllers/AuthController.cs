@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Seguridad;
 
@@ -10,6 +12,7 @@ namespace SistemaCPC.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[Produces("application/json")]
 public class AuthController : ControllerBase
 {
     private readonly CpcContext _context;
@@ -22,6 +25,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EndpointSummary("CU-01: iniciar sesión y obtener el token (dura 15 minutos)")]
+    [ProducesResponseType<LoginRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginRespuesta>> Login(LoginSolicitud solicitud)
     {
         var usuario = await _context.Usuarios
@@ -30,7 +37,7 @@ public class AuthController : ControllerBase
 
         if (usuario == null)
         {
-            return Unauthorized(new { mensaje = "Registro o contraseña incorrectos." });
+            return Unauthorized(new ErrorRespuesta("Registro o contraseña incorrectos."));
         }
 
         var resultado = new PasswordHasher<Usuario>()
@@ -38,7 +45,7 @@ public class AuthController : ControllerBase
 
         if (resultado == PasswordVerificationResult.Failed)
         {
-            return Unauthorized(new { mensaje = "Registro o contraseña incorrectos." });
+            return Unauthorized(new ErrorRespuesta("Registro o contraseña incorrectos."));
         }
 
         return Ok(Respuesta(usuario));
@@ -46,6 +53,9 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("renovar")]
+    [EndpointSummary("Renovar el token antes de que venza")]
+    [ProducesResponseType<LoginRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginRespuesta>> Renovar()
     {
         var usuario = await _context.Usuarios
@@ -54,7 +64,7 @@ public class AuthController : ControllerBase
 
         if (usuario == null)
         {
-            return Unauthorized(new { mensaje = "El usuario ya no existe." });
+            return Unauthorized(new ErrorRespuesta("El usuario ya no existe."));
         }
 
         return Ok(Respuesta(usuario));

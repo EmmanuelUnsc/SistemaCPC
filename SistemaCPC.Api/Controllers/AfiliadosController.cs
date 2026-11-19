@@ -1,40 +1,23 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Patrones.Facade;
 
 namespace SistemaCPC.Api.Controllers;
 
-public class AfiliadoSolicitud
-{
-    public string Registro { get; set; } = string.Empty;
-    public string Nombre { get; set; } = string.Empty;
-    public string Carnet { get; set; } = string.Empty;
-    public DateOnly FechaAfiliacion { get; set; }
-    public DateOnly FechaInicioCobro { get; set; }
-    public bool EsTribunal { get; set; }
-    public string? Contrasena { get; set; }
-}
-
-public class BajaSolicitud
-{
-    public string Motivo { get; set; } = string.Empty;
-    public DateOnly Fecha { get; set; }
-}
-
-public record AfiliadoRespuesta(string Registro, string Nombre, string Carnet, DateOnly FechaAfiliacion,
-    DateOnly FechaInicioCobro, bool EsTribunal, bool TieneFoto, string Estado, int MesesAdeudados, decimal Deuda,
-    DateOnly? FechaBaja, string? MotivoBaja);
-
 [Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/afiliados")]
+[Produces("application/json")]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public class AfiliadosController : ControllerBase
 {
-    private static readonly string[] MotivosDeBaja = { "Renuncia", "Fallecimiento" };
     private static readonly string[] TiposDeFoto = { "image/jpeg", "image/png" };
     private const int TamanoMaximoFoto = 2 * 1024 * 1024;
 
@@ -48,6 +31,8 @@ public class AfiliadosController : ControllerBase
     }
 
     [HttpGet]
+    [EndpointSummary("CU-06: lista de afiliados con su estado y su deuda")]
+    [ProducesResponseType<List<AfiliadoRespuesta>>(StatusCodes.Status200OK)]
     public async Task<List<AfiliadoRespuesta>> Listar()
     {
         var afiliados = await ConDatosDeCuenta().OrderBy(a => a.Registro).ToListAsync();
@@ -56,72 +41,87 @@ public class AfiliadosController : ControllerBase
     }
 
     [HttpGet("{registro}")]
+    [EndpointSummary("CU-06: un afiliado por su número de registro")]
+    [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AfiliadoRespuesta>> Obtener(string registro)
     {
         var afiliado = await ConDatosDeCuenta().FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
         {
-            return NotFound(new { mensaje = "No existe un afiliado con ese registro." });
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
-        return Respuesta(afiliado);
+        return await RespuestaAsync(afiliado);
     }
 
     [HttpPost]
+    [EndpointSummary("CU-06: registrar un afiliado con su contraseña inicial")]
+    [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<AfiliadoRespuesta>> Crear(AfiliadoSolicitud solicitud)
     {
-        var error = Validar(solicitud);
-
-        if (error == null && (solicitud.Contrasena ?? string.Empty).Length < 4)
+        if (string.IsNullOrEmpty(solicitud.Contrasena))
         {
-            error = "La contraseña inicial debe tener al menos 4 caracteres.";
+            return BadRequest(new ErrorRespuesta("La contraseña inicial es obligatoria al registrar un afiliado."));
         }
+
+        var error = ValidarFechas(solicitud.FechaAfiliacion!.Value, solicitud.FechaInicioCobro!.Value);
 
         if (error != null)
         {
-            return BadRequest(new { mensaje = error });
+            return BadRequest(new ErrorRespuesta(error));
         }
 
-        if (await _context.Usuarios.AnyAsync(u => u.Registro == solicitud.Registro))
+        var registro = solicitud.Registro.Trim();
+
+        if (await _context.Usuarios.AnyAsync(u => u.Registro == registro))
         {
-            return Conflict(new { mensaje = "Ya existe un usuario con ese número de registro." });
+            return Conflict(new ErrorRespuesta("Ya existe un usuario con ese número de registro."));
         }
 
-        var afiliado = new Afiliado { Registro = solicitud.Registro.Trim(), Rol = Rol.Afiliado };
-        Copiar(solicitud, afiliado);
-        afiliado.ContrasenaCifrada = new PasswordHasher<Usuario>().HashPassword(afiliado, solicitud.Contrasena!);
+        var afiliado = new Afiliado
+        {
+            Registro = registro, Rol = Rol.Afiliado, Nombre = solicitud.Nombre.Trim(), Carnet = solicitud.Carnet.Trim(),
+            FechaAfiliacion = solicitud.FechaAfiliacion.Value, FechaInicioCobro = solicitud.FechaInicioCobro.Value,
+            EsTribunal = solicitud.EsTribunal
+        };
+        afiliado.ContrasenaCifrada = new PasswordHasher<Usuario>().HashPassword(afiliado, solicitud.Contrasena);
 
         _context.Afiliados.Add(afiliado);
         await _context.SaveChangesAsync();
 
-        return Ok(Respuesta(afiliado));
+        return CreatedAtAction(nameof(Obtener), new { registro = afiliado.Registro }, Respuesta(afiliado, false));
     }
 
     [HttpPut("{registro}")]
-    public async Task<ActionResult<AfiliadoRespuesta>> Actualizar(string registro, AfiliadoSolicitud solicitud)
+    [EndpointSummary("CU-06: actualizar los datos de un afiliado (la contraseña solo si se envía)")]
+    [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<AfiliadoRespuesta>> Actualizar(string registro, ActualizarAfiliadoSolicitud solicitud)
     {
-        solicitud.Registro = registro;
-        var error = Validar(solicitud);
-
-        if (error == null && !string.IsNullOrEmpty(solicitud.Contrasena) && solicitud.Contrasena.Length < 4)
-        {
-            error = "La contraseña nueva debe tener al menos 4 caracteres.";
-        }
+        var error = ValidarFechas(solicitud.FechaAfiliacion!.Value, solicitud.FechaInicioCobro!.Value);
 
         if (error != null)
         {
-            return BadRequest(new { mensaje = error });
+            return BadRequest(new ErrorRespuesta(error));
         }
 
         var afiliado = await ConDatosDeCuenta().FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
         {
-            return NotFound(new { mensaje = "No existe un afiliado con ese registro." });
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
-        Copiar(solicitud, afiliado);
+        afiliado.Nombre = solicitud.Nombre.Trim();
+        afiliado.Carnet = solicitud.Carnet.Trim();
+        afiliado.FechaAfiliacion = solicitud.FechaAfiliacion.Value;
+        afiliado.FechaInicioCobro = solicitud.FechaInicioCobro.Value;
+        afiliado.EsTribunal = solicitud.EsTribunal;
 
         if (!string.IsNullOrEmpty(solicitud.Contrasena))
         {
@@ -129,54 +129,59 @@ public class AfiliadosController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
-        return Respuesta(afiliado);
+        return await RespuestaAsync(afiliado);
     }
 
     [HttpPost("{registro}/baja")]
+    [EndpointSummary("CU-06, RF-25: registrar la baja por renuncia o fallecimiento; desde esa fecha no se suman aportes")]
+    [ProducesResponseType<AfiliadoRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AfiliadoRespuesta>> RegistrarBaja(string registro, BajaSolicitud solicitud)
     {
-        if (!MotivosDeBaja.Contains(solicitud.Motivo))
-        {
-            return BadRequest(new { mensaje = "El motivo de la baja es Renuncia o Fallecimiento." });
-        }
-
         var afiliado = await ConDatosDeCuenta().FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
         {
-            return NotFound(new { mensaje = "No existe un afiliado con ese registro." });
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
         if (afiliado.FechaBaja != null)
         {
-            return BadRequest(new { mensaje = "El afiliado ya tiene una baja registrada." });
+            return BadRequest(new ErrorRespuesta("El afiliado ya tiene una baja registrada."));
         }
 
-        if (solicitud.Fecha < afiliado.FechaAfiliacion || solicitud.Fecha > DateOnly.FromDateTime(DateTime.Today))
+        var fecha = solicitud.Fecha!.Value;
+
+        if (fecha < afiliado.FechaAfiliacion || fecha > Hoy)
         {
-            return BadRequest(new { mensaje = "La fecha de baja debe estar entre la afiliación y hoy." });
+            return BadRequest(new ErrorRespuesta("La fecha de baja debe estar entre la afiliación y hoy."));
         }
 
-        afiliado.FechaBaja = solicitud.Fecha;
+        afiliado.FechaBaja = fecha;
         afiliado.MotivoBaja = solicitud.Motivo;
         await _context.SaveChangesAsync();
 
-        return Respuesta(afiliado);
+        return await RespuestaAsync(afiliado);
     }
 
     [HttpPut("{registro}/foto")]
+    [EndpointSummary("CU-06: guardar la foto del afiliado (JPG o PNG, hasta 2 MB)")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GuardarFoto(string registro, IFormFile foto)
     {
         if (!TiposDeFoto.Contains(foto.ContentType) || foto.Length > TamanoMaximoFoto)
         {
-            return BadRequest(new { mensaje = "La foto debe ser JPG o PNG de hasta 2 MB." });
+            return BadRequest(new ErrorRespuesta("La foto debe ser JPG o PNG de hasta 2 MB."));
         }
 
         var afiliado = await _context.Afiliados.FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
         {
-            return NotFound(new { mensaje = "No existe un afiliado con ese registro." });
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
         var guardada = await _context.FotosAfiliados.FindAsync(afiliado.Id);
@@ -197,47 +202,39 @@ public class AfiliadosController : ControllerBase
     }
 
     [HttpGet("{registro}/foto")]
+    [EndpointSummary("CU-06: ver la foto del afiliado")]
+    [Produces("image/jpeg", "image/png", "application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerFoto(string registro)
     {
         var foto = await _context.FotosAfiliados.FirstOrDefaultAsync(f => f.Afiliado!.Registro == registro);
 
         if (foto == null)
         {
-            return NotFound(new { mensaje = "El afiliado no tiene foto." });
+            return NotFound(new ErrorRespuesta("El afiliado no tiene foto."));
         }
 
         return File(foto.Datos, foto.Tipo);
     }
 
+    private static DateOnly Hoy => DateOnly.FromDateTime(DateTime.Today);
+
+    private static string? ValidarFechas(DateOnly afiliacion, DateOnly inicioCobro)
+    {
+        if (afiliacion > Hoy)
+        {
+            return "La fecha de afiliación no puede ser posterior a hoy.";
+        }
+
+        return inicioCobro < afiliacion ? "El inicio de cobro no puede ser anterior a la fecha de afiliación." : null;
+    }
+
     private IQueryable<Afiliado> ConDatosDeCuenta() =>
         _context.Afiliados.Include(a => a.Pagos).Include(a => a.Ajustes);
 
-    private static string? Validar(AfiliadoSolicitud s)
-    {
-        if (string.IsNullOrWhiteSpace(s.Registro) || string.IsNullOrWhiteSpace(s.Nombre) || string.IsNullOrWhiteSpace(s.Carnet))
-        {
-            return "El registro, el nombre y el carnet son obligatorios.";
-        }
-
-        if (s.FechaAfiliacion == default || s.FechaInicioCobro == default)
-        {
-            return "La fecha de afiliación y la de inicio de cobro son obligatorias.";
-        }
-
-        return null;
-    }
-
-    private static void Copiar(AfiliadoSolicitud s, Afiliado a)
-    {
-        a.Nombre = s.Nombre.Trim();
-        a.Carnet = s.Carnet.Trim();
-        a.FechaAfiliacion = s.FechaAfiliacion;
-        a.FechaInicioCobro = s.FechaInicioCobro;
-        a.EsTribunal = s.EsTribunal;
-    }
-
-    private AfiliadoRespuesta Respuesta(Afiliado a) =>
-        Respuesta(a, _context.FotosAfiliados.Any(f => f.AfiliadoId == a.Id));
+    private async Task<AfiliadoRespuesta> RespuestaAsync(Afiliado a) =>
+        Respuesta(a, await _context.FotosAfiliados.AnyAsync(f => f.AfiliadoId == a.Id));
 
     private AfiliadoRespuesta Respuesta(Afiliado a, bool tieneFoto)
     {

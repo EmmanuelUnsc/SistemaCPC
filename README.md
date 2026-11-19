@@ -1,51 +1,92 @@
-# Sistema de gestión del CPC
+# SistemaCPC: sistema de gestión del Colegio de Profesionales en Comunicación de Santa Cruz
 
-Sistema de gestión del Colegio de Profesionales en Comunicación de Santa Cruz.
-Proyecto de Sistemas I, Ingeniería de Software y Programación Web III (Univalle, 2026).
+Proyecto integrador de Proyecto de Sistemas I, Ingeniería de Software y Programación Web III (Univalle, 2026).
+Lleva los afiliados del Colegio, sus aportes mensuales, las defensas de grado en las que participan como tribunal
+y los reportes del directorio.
+
+| Dato | Valor |
+|---|---|
+| Versión de .NET | .NET 10 (ASP.NET Core 10, Entity Framework Core 10) |
+| Base de datos | SQL Server (en desarrollo, SQL Server Express LocalDB) |
+| Repositorio | https://github.com/EmmanuelUnsc/SistemaCPC |
+
+## Integrantes
+
+| Integrante | Usuario de GitHub |
+|---|---|
+| Gorostiaga Gonzales Diego Emmanuel | [EmmanuelUnsc](https://github.com/EmmanuelUnsc) |
+| Colautti Rodriguez Nicolas | [Niko1099](https://github.com/Niko1099) |
+| Yabeta Arias Alejandro | [alejandroyabetar](https://github.com/alejandroyabetar) |
 
 ## Estructura
 
 | Proyecto | Qué es | Dirección |
 |---|---|---|
-| `SistemaCPC.Api` | API REST en ASP.NET Core (.NET 10) con Entity Framework Core y PostgreSQL | http://localhost:5100 (Swagger en `/swagger`) |
+| `SistemaCPC.Api` | Web API REST en ASP.NET Core con Entity Framework Core y SQL Server | http://localhost:5100 (Swagger en `/swagger`) |
 | `SistemaCPC.Web` | Pantallas en ASP.NET Core MVC con Bootstrap; llama a la API | http://localhost:5210 |
-| `docker-compose.yml` | Base de datos PostgreSQL para desarrollo | puerto 5432 |
 
-## Cómo levantarlo
+Dentro de `SistemaCPC.Api`: `Models/` (entidades), `Dtos/` (datos de entrada y salida), `Data/` (contexto de EF Core,
+datos de prueba y migraciones), `Controllers/`, `Patrones/` (patrones de diseño) y `Seguridad/` (token de acceso).
 
-Requisitos: SDK de .NET 10 y Docker Desktop (abierto).
+## Configuración local
 
-**Solo la primera vez**, crear el contenedor de la base de datos (desde esta carpeta):
+### 1. Requisitos
+
+- SDK de .NET 10.
+- SQL Server. Lo más simple es **SQL Server Express LocalDB**, que se instala con Visual Studio
+  (carga de trabajo «Desarrollo de ASP.NET y web» o «Almacenamiento y procesamiento de datos»).
+  Para comprobar que está: `sqllocaldb info` debe mostrar `MSSQLLocalDB`.
+- La herramienta de migraciones de EF Core, si se aplican a mano: `dotnet tool install --global dotnet-ef`.
+
+### 2. Conexión a SQL Server
+
+La cadena de conexión está en `SistemaCPC.Api/appsettings.json`, clave `ConnectionStrings:CpcConexion`.
+Con LocalDB no lleva usuario ni contraseña, porque usa la cuenta de Windows:
 
 ```
-docker compose up -d
+Server=(localdb)\MSSQLLocalDB;Database=SistemaCPC;Trusted_Connection=True;TrustServerCertificate=True
 ```
 
-### Con Visual Studio (2022 17.11 o posterior)
+Si se usa otra instancia de SQL Server, se cambia solo esa línea. Ejemplos (sin credenciales reales):
 
-1. Abrir Docker Desktop y darle Play al contenedor `sistemacpc`.
-2. Abrir `SistemaCPC.sln`.
-3. En la barra de arranque, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar Iniciar.
-   Se inician los dos proyectos y se abre http://localhost:5210
+```
+Server=localhost;Database=SistemaCPC;Trusted_Connection=True;TrustServerCertificate=True
+Server=localhost,1433;Database=SistemaCPC;User Id=USUARIO;Password=CONTRASEÑA;TrustServerCertificate=True
+```
 
-### Desde la terminal
+### 3. Migraciones
 
-1. API, en una terminal:
+La API aplica las migraciones sola al arrancar (crea la base `SistemaCPC` si no existe). Para aplicarlas a mano,
+desde la carpeta del repositorio:
 
-   ```
-   dotnet run --project SistemaCPC.Api --launch-profile http
-   ```
+```
+dotnet ef database update --project SistemaCPC.Api
+```
 
-2. Web, en otra terminal:
+Las migraciones están en `SistemaCPC.Api/Data/Migrations`. Para crear una nueva después de cambiar el modelo:
+`dotnet ef migrations add <Nombre> --project SistemaCPC.Api -o Data/Migrations`.
 
-   ```
-   dotnet run --project SistemaCPC.Web --launch-profile http
-   ```
+### 4. Datos de prueba
 
-3. Abrir http://localhost:5210
+Se cargan solos la primera vez que arranca la API con la base vacía (`SistemaCPC.Api/Data/DatosIniciales.cs`):
+los usuarios de la tabla de abajo, los parámetros (aporte de Bs 35, Bs 208 por defensa), un pago y dos defensas.
+Para empezar de cero: `dotnet ef database drop --project SistemaCPC.Api` y volver a arrancar la API.
 
-Al arrancar, la API crea las tablas y carga los usuarios de prueba si la base está vacía
-(`SistemaCPC.Api/Data/DatosIniciales.cs`).
+### 5. Ejecutar y abrir Swagger
+
+Con Visual Studio: abrir `SistemaCPC.sln`, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar
+Iniciar. Desde la terminal, en dos ventanas:
+
+```
+dotnet run --project SistemaCPC.Api --launch-profile http
+dotnet run --project SistemaCPC.Web --launch-profile http
+```
+
+- Swagger: http://localhost:5100/swagger
+- Pantallas: http://localhost:5210
+
+En Swagger, primero `POST /api/auth/login` con un usuario de prueba, copiar el `token` de la respuesta, presionar
+**Authorize** y pegarlo. Desde ese momento se pueden probar las demás rutas con los permisos de ese usuario.
 
 ## Usuarios de prueba
 
@@ -78,7 +119,7 @@ Un afiliado solo puede ver su propia información (RF-02).
 | PUT | `/api/pagos/{numeroRecibo}` | CU-05 Corregir pago (queda en la bitácora) | Directorio | Decorator |
 | GET | `/api/afiliados` | CU-06 Gestionar afiliados (lista con estado y deuda) | Directorio | |
 | GET | `/api/afiliados/{registro}` | CU-06 Ver un afiliado | Directorio | |
-| POST | `/api/afiliados` | CU-06 Registrar afiliado (con contraseña inicial) | Directorio | |
+| POST | `/api/afiliados` | CU-06 Registrar afiliado (con contraseña inicial; responde 201 con `Location`) | Directorio | |
 | PUT | `/api/afiliados/{registro}` | CU-06 Actualizar afiliado | Directorio | |
 | POST | `/api/afiliados/{registro}/baja` | CU-06 Registrar baja (RF-25) | Directorio | |
 | PUT / GET | `/api/afiliados/{registro}/foto` | CU-06 Guardar y ver la foto (JPG o PNG, hasta 2 MB) | Directorio | |
@@ -115,20 +156,28 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 
 Cada patrón está marcado en el código con un comentario `// Patrón …`.
 
+## Modelo de datos
+
+| Tabla | Clave | Relación |
+|---|---|---|
+| `Usuarios` | `Id` (registro único) | Afiliados, miembros del directorio y superadministradores en una sola tabla (columna `Tipo`) |
+| `Pagos` | `Id` (número de recibo único) | Cada pago es de un afiliado (`AfiliadoId`); un afiliado tiene muchos pagos |
+| `Defensas` | `Id` | Cada defensa tiene un tribunal (`AfiliadoId`); un tribunal tiene muchas defensas |
+| `Ajustes` | `Id` | Cada ajuste es de un afiliado y lo registra un superadministrador |
+| `Bitacora` | `Id` | Registro de cada ajuste y corrección de pago, con los valores anterior y nuevo |
+| `FotosAfiliados` | `AfiliadoId` | Una foto por afiliado (uno a uno) |
+| `Parametros` | `Id` | Una sola fila: aporte mensual, monto por defensa, umbral de inactividad y tope de defensas |
+
+La deuda se calcula en bolivianos, como en el Excel del Colegio: meses desde el inicio de cobro (hasta la baja, si hay) ×
+aporte mensual − pagos − ajustes. Si es negativa, es saldo a favor. El afiliado está inactivo si la deuda supera el umbral
+(4 cuotas, Bs 140).
+
 ## Estado actual
 
-- Funcionan de punta a punta (Web -> API -> PostgreSQL):
+- Funcionan de punta a punta (Web -> API -> SQL Server):
   - CU-01 Iniciar sesión, con token para la API y sesión que se cierra tras 15 minutos de inactividad (RNF-03).
-  - Afiliado: Mi estado de cuenta (meses adeudados por año, ajustes, total e historial de pagos) y Pagar (pago simulado).
+  - Afiliado: Mi estado de cuenta (meses adeudados por año, total o saldo a favor e historial de pagos) y Pagar (pago simulado).
   - Directorio: Afiliados (registrar, editar, foto y baja) y Pagos (registrar un recibo de oficina y corregir un pago).
   - Superadministrador: Ajustes, con la bitácora.
 - La API ya registra defensas (CU-07) y genera los reportes de CU-09, pero esas pantallas, la del saldo de tribunal (CU-03)
   y la de avisos todavía muestran datos de ejemplo (Sprint 3).
-
-## Base de datos
-
-- Antes de una demostración, empezar con los datos de prueba limpios: `docker compose down -v` y luego `docker compose up -d`.
-
-- Crear una migración después de cambiar el modelo:
-  `dotnet ef migrations add <Nombre> --project SistemaCPC.Api -o Data/Migrations`
-- Borrar la base de prueba y empezar de cero: `docker compose down -v`

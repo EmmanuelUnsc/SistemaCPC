@@ -5,7 +5,7 @@ public record AnioAdeudado(int Anio, List<string> Meses, decimal Monto);
 public record PagoDelHistorial(string NumeroRecibo, DateOnly Fecha, decimal Monto, int MesesCubiertos);
 
 public record EstadoCuenta(string Registro, string Nombre, string Estado, int MesesAdeudados, decimal Deuda,
-    decimal AporteMensual, List<AnioAdeudado> MesesPorAnio, decimal Ajustes, List<PagoDelHistorial> Pagos);
+    decimal AporteMensual, List<AnioAdeudado> MesesPorAnio, List<PagoDelHistorial> Pagos);
 
 public record PagoRegistrado(string NumeroRecibo, DateOnly Fecha, decimal Monto, int MesesCubiertos, string Origen);
 

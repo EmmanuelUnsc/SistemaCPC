@@ -1,22 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Controllers;
 
-public class ParametrosSolicitud
-{
-    public decimal AporteMensual { get; set; }
-    public decimal MontoPorDefensa { get; set; }
-    public int UmbralInactividad { get; set; }
-    public int TopeDefensasMes { get; set; }
-}
-
 [Authorize]
 [ApiController]
 [Route("api/parametros")]
+[Produces("application/json")]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class ParametrosController : ControllerBase
 {
     private readonly ParametrosSistema _parametros;
@@ -29,16 +25,22 @@ public class ParametrosController : ControllerBase
     }
 
     [HttpGet]
+    [EndpointSummary("Parámetros de los cálculos (aporte, monto por defensa, umbral y tope)")]
+    [ProducesResponseType<ParametrosSistema>(StatusCodes.Status200OK)]
     public ParametrosSistema Obtener() => _parametros;
 
     [Authorize(Roles = "Directorio")]
     [HttpPut]
+    [EndpointSummary("Cambiar los parámetros (directorio; la instancia única se recarga)")]
+    [ProducesResponseType<ParametrosSistema>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ParametrosSistema>> Actualizar(ParametrosSolicitud solicitud)
     {
         if (solicitud.AporteMensual <= 0 || solicitud.MontoPorDefensa <= 0 || solicitud.UmbralInactividad < 1
             || solicitud.TopeDefensasMes < 0)
         {
-            return BadRequest(new { mensaje = "Los valores deben ser positivos; el tope puede ser 0 (sin tope)." });
+            return BadRequest(new ErrorRespuesta("Los valores deben ser positivos; el tope puede ser 0 (sin tope)."));
         }
 
         var guardados = await _context.Parametros.FirstAsync();

@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<CpcContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("CpcConexion")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CpcConexion")));
 
 // Patrón Singleton
 builder.Services.AddSingleton<ParametrosSistema>();

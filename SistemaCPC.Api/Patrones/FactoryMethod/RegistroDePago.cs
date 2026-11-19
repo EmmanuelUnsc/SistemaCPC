@@ -1,4 +1,5 @@
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Patrones.Singleton;
 

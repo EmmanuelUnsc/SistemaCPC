@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Patrones.Adapter;
 using SistemaCPC.Api.Patrones.Builder;
 using SistemaCPC.Api.Patrones.Facade;

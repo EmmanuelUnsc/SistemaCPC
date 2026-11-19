@@ -1,27 +1,20 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Patrones.Decorator;
 
 namespace SistemaCPC.Api.Controllers;
 
-public class AjusteSolicitud
-{
-    public string Registro { get; set; } = string.Empty;
-    public string Tipo { get; set; } = string.Empty;
-    public decimal Monto { get; set; }
-    public string Motivo { get; set; } = string.Empty;
-}
-
-public record AjusteRespuesta(string Tipo, decimal Monto, string Motivo, DateOnly Fecha);
-
-public record RegistroBitacoraRespuesta(DateTime Fecha, string Usuario, string Motivo, decimal ValorAnterior, decimal ValorNuevo);
-
 [Authorize(Roles = "Directorio")]
 [ApiController]
 [Route("api/ajustes")]
+[Produces("application/json")]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
 public class AjustesController : ControllerBase
 {
     private readonly CpcContext _context;
@@ -35,11 +28,15 @@ public class AjustesController : ControllerBase
 
     [Authorize(Roles = "Superadministrador")]
     [HttpPost]
+    [EndpointSummary("CU-10: registrar un ajuste a la deuda (superadministrador; queda en la bitácora)")]
+    [ProducesResponseType<AjusteRespuesta>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AjusteRespuesta>> Registrar(AjusteSolicitud solicitud)
     {
         if (string.IsNullOrWhiteSpace(solicitud.Tipo) || string.IsNullOrWhiteSpace(solicitud.Motivo) || solicitud.Monto == 0)
         {
-            return BadRequest(new { mensaje = "El tipo, el monto y el motivo son obligatorios." });
+            return BadRequest(new ErrorRespuesta("El tipo, el monto y el motivo son obligatorios."));
         }
 
         var superadministrador = await _context.Usuarios.OfType<Superadministrador>()
@@ -52,7 +49,7 @@ public class AjustesController : ControllerBase
 
         if (afiliado == null)
         {
-            return NotFound(new { mensaje = "No existe un afiliado con ese registro." });
+            return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
         var ajuste = new Ajuste
@@ -66,6 +63,8 @@ public class AjustesController : ControllerBase
     }
 
     [HttpGet("bitacora")]
+    [EndpointSummary("Bitácora de ajustes y correcciones de pagos")]
+    [ProducesResponseType<List<RegistroBitacoraRespuesta>>(StatusCodes.Status200OK)]
     public async Task<List<RegistroBitacoraRespuesta>> Bitacora()
     {
         return await _context.Bitacora

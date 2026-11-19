@@ -2,13 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 using SistemaCPC.Api.Patrones.ChainOfResponsibility;
 using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Controllers;
-
-public record DefensaRespuesta(string NumeroOficio, string Universidad, DateOnly Fecha, string Tribunal, string Estado);
 
 [Authorize(Roles = "Directorio")]
 [ApiController]

@@ -1,17 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Data;
+using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Patrones.Singleton;
 
 namespace SistemaCPC.Api.Patrones.ChainOfResponsibility;
-
-public class SolicitudDefensa
-{
-    public string NumeroOficio { get; set; } = string.Empty;
-    public string Universidad { get; set; } = string.Empty;
-    public string Carta { get; set; } = string.Empty;
-    public DateOnly Fecha { get; set; }
-    public string RegistroTribunal { get; set; } = string.Empty;
-}
 
 // Patrón Chain of Responsibility
 public abstract class ValidadorDefensa
