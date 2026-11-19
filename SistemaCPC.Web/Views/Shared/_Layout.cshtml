@@ -15,19 +15,28 @@
         string Activa(string c, string? a = null) =>
             controlador == c && (a == null || accion == a) ? "nav-link active" : "nav-link";
     }
-    <header class="border-bottom mb-3 bg-light">
-        <div class="container pt-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fs-5 fw-semibold">CPC - Sistema de gestión</span>
+    <header class="mb-4">
+        <div class="cpc-barra">
+            <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2 py-2">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="~/img/logo-cpc.png" alt="Logo del Colegio" class="cpc-logo" />
+                    <div class="cpc-nombre">
+                        <div class="fw-semibold">Colegio de Profesionales en Comunicación</div>
+                        <div class="small">Sistema de gestión</div>
+                    </div>
+                </div>
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <span class="text-muted small">@User.FindFirst("Nombre")?.Value (@User.Identity.Name)</span>
+                    <span class="cpc-usuario small">@User.FindFirst("Nombre")?.Value (@User.Identity.Name)</span>
                 }
             </div>
+        </div>
 
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <ul class="nav nav-tabs">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="cpc-menu">
+                <div class="container">
+                <ul class="nav">
                     @if (User.IsInRole("Directorio"))
                     {
                         <li class="nav-item"><a class="@Activa("Afiliados")" asp-controller="Afiliados" asp-action="Index">Afiliados</a></li>
@@ -51,8 +60,9 @@
                         </form>
                     </li>
                 </ul>
-            }
-        </div>
+                </div>
+            </div>
+        }
     </header>
 
     <div class="container">

@@ -13,16 +13,40 @@
 
 @if (Model != null)
 {
-    <p>Estado: <strong>@Model.Estado</strong> &nbsp;|&nbsp;
-        @if (Model.Deuda < 0)
-        {
-            <span>Saldo a favor: <strong>@Formato.Bs(-Model.Deuda)</strong></span>
-        }
-        else
-        {
-            <span>Deuda total: <strong>@Formato.Bs(Model.Deuda)</strong></span>
-        }
-    </p>
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-4">
+            <div class="card cpc-dato h-100 @(Model.Estado == "Activo" ? "activo" : Model.Estado == "Inactivo" ? "inactivo" : "")">
+                <div class="card-body">
+                    <h2 class="card-subtitle mb-1">Estado</h2>
+                    <p class="card-text"><span class="badge @Formato.ColorEstado(Model.Estado)">@Model.Estado</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4">
+            <div class="card cpc-dato h-100">
+                <div class="card-body">
+                    @if (Model.Deuda < 0)
+                    {
+                        <h2 class="card-subtitle mb-1">Saldo a favor</h2>
+                        <p class="card-text text-success">@Formato.Bs(-Model.Deuda)</p>
+                    }
+                    else
+                    {
+                        <h2 class="card-subtitle mb-1">Deuda total</h2>
+                        <p class="card-text">@Formato.Bs(Model.Deuda)</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4">
+            <div class="card cpc-dato h-100">
+                <div class="card-body">
+                    <h2 class="card-subtitle mb-1">Meses adeudados</h2>
+                    <p class="card-text">@Model.MesesAdeudados</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-md-8">
@@ -33,16 +57,18 @@
             }
             else
             {
-                <table class="table table-sm table-striped">
-                    <thead><tr><th>Año</th><th>Meses</th><th>Monto</th></tr></thead>
-                    <tbody>
-                        @foreach (var anio in Model.MesesPorAnio)
-                        {
-                            <tr><td>@anio.Anio</td><td>@Rango(anio.Meses) (@anio.Meses.Count)</td><td>@Formato.Bs(anio.Monto)</td></tr>
-                        }
-                    </tbody>
-                    <tfoot><tr><th colspan="2">Total</th><th>@Formato.Bs(Model.Deuda)</th></tr></tfoot>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead><tr><th>Año</th><th>Meses</th><th>Monto</th></tr></thead>
+                        <tbody>
+                            @foreach (var anio in Model.MesesPorAnio)
+                            {
+                                <tr><td>@anio.Anio</td><td>@Rango(anio.Meses) (@anio.Meses.Count)</td><td>@Formato.Bs(anio.Monto)</td></tr>
+                            }
+                        </tbody>
+                        <tfoot><tr><th colspan="2">Total</th><th>@Formato.Bs(Model.Deuda)</th></tr></tfoot>
+                    </table>
+                </div>
             }
 
             <h2 class="h6">Historial de pagos</h2>
@@ -52,25 +78,29 @@
             }
             else
             {
-                <table class="table table-sm table-striped">
-                    <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th></tr></thead>
-                    <tbody>
-                        @foreach (var pago in Model.Pagos)
-                        {
-                            <tr><td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td><td>@pago.MesesCubiertos</td></tr>
-                        }
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th></tr></thead>
+                        <tbody>
+                            @foreach (var pago in Model.Pagos)
+                            {
+                                <tr><td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td><td>@pago.MesesCubiertos</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
-        <div class="col-md-4">
-            <a class="btn btn-primary w-100 mb-4" asp-action="Pagar">Pagar mi deuda</a>
+        <div class="col-md-4 order-first order-md-last">
+            <a class="btn btn-primary btn-lg w-100 mb-4" asp-action="Pagar">Pagar mi deuda</a>
 
             <h2 class="h6">Avisos vigentes</h2>
-            <table class="table table-sm table-striped">
-                <thead><tr><th>Aviso</th><th>Vence</th></tr></thead>
-                <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead><tr><th>Aviso</th><th>Vence</th></tr></thead>
+                    <tbody><tr><td>Asamblea general</td><td>30/10/2026</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
 }

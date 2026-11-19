@@ -2,9 +2,12 @@
     ViewData["Title"] = "Iniciar sesión";
 }
 
-<div class="row justify-content-center mt-4">
-    <div class="col-md-5">
-        <h1 class="h3 text-center">Colegio de Profesionales en Comunicación</h1>
+<div class="card cpc-tarjeta-login mx-auto">
+    <div class="card-body p-4">
+        <div class="text-center mb-3">
+            <img src="~/img/logo-cpc.png" alt="Logo del Colegio de Profesionales en Comunicación" class="img-fluid" />
+        </div>
+        <h1 class="visually-hidden">Colegio de Profesionales en Comunicación</h1>
         <p class="text-center text-muted mb-4">Ingrese con su número de registro</p>
 
         @if ((ViewData["Error"] ?? TempData["Error"]) is { } error)

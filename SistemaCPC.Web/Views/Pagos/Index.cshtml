@@ -23,7 +23,7 @@
 
 @if (Model.Afiliado is { } afiliado)
 {
-    <p>Afiliado: <strong>@afiliado.Nombre</strong> (@afiliado.Registro) &nbsp;|&nbsp; Estado: @afiliado.Estado
+    <p>Afiliado: <strong>@afiliado.Nombre</strong> (@afiliado.Registro) &nbsp;|&nbsp; Estado: <span class="badge @Formato.ColorEstado(afiliado.Estado)">@afiliado.Estado</span>
         &nbsp;|&nbsp; Deuda: <strong>@Formato.Bs(afiliado.Deuda)</strong></p>
 
     <form method="post" id="formulario-pago">
@@ -66,19 +66,21 @@
                 }
                 else
                 {
-                    <table class="table table-sm table-striped seleccionable">
-                        <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th><th>Origen</th></tr></thead>
-                        <tbody>
-                            @foreach (var pago in Model.Pagos)
-                            {
-                                <tr data-recibo="@pago.NumeroRecibo" data-fecha="@pago.Fecha.ToString("yyyy-MM-dd")"
-                                    data-monto="@pago.Monto.ToString("0.##")" data-meses="@pago.MesesCubiertos">
-                                    <td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td>
-                                    <td>@pago.MesesCubiertos</td><td>@pago.Origen</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped seleccionable align-middle">
+                            <thead><tr><th>Recibo</th><th>Fecha</th><th>Monto</th><th>Meses</th><th>Origen</th></tr></thead>
+                            <tbody>
+                                @foreach (var pago in Model.Pagos)
+                                {
+                                    <tr data-recibo="@pago.NumeroRecibo" data-fecha="@pago.Fecha.ToString("yyyy-MM-dd")"
+                                        data-monto="@pago.Monto.ToString("0.##")" data-meses="@pago.MesesCubiertos">
+                                        <td>@pago.NumeroRecibo</td><td>@Formato.Fecha(pago.Fecha)</td><td>@Formato.Bs(pago.Monto)</td>
+                                        <td>@pago.MesesCubiertos</td><td>@pago.Origen</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
                 <button type="submit" class="btn btn-outline-primary" asp-action="Corregir">Corregir pago</button>
                 <p class="text-muted small mt-2">Elija el pago en la tabla, cambie los meses y escriba el motivo. Cada corrección queda en la bitácora.</p>

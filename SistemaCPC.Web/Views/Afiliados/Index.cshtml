@@ -14,7 +14,8 @@
 
 <div class="row mb-4">
     <div class="col-md-8">
-        <table class="table table-striped seleccionable align-middle">
+        <div class="table-responsive">
+        <table class="table table-sm table-striped seleccionable align-middle">
             <thead>
                 <tr><th>Foto</th><th>Registro</th><th>Nombre</th><th>Estado</th><th>Deuda</th><th>Tribunal</th></tr>
             </thead>
@@ -30,12 +31,13 @@
                                 <img src="@Url.Action("Foto", new { id = a.Registro })" alt="Foto de @a.Nombre" width="40" height="40" class="rounded object-fit-cover" />
                             }
                         </td>
-                        <td>@a.Registro</td><td>@a.Nombre</td><td>@a.Estado</td><td>@Formato.Bs(a.Deuda)</td>
+                        <td>@a.Registro</td><td>@a.Nombre</td><td><span class="badge @Formato.ColorEstado(a.Estado)">@a.Estado</span></td><td class="text-nowrap">@Formato.Bs(a.Deuda)</td>
                         <td>@(a.EsTribunal ? "Sí" : "No")</td>
                     </tr>
                 }
             </tbody>
         </table>
+        </div>
         <p class="text-muted small">@Model.Count afiliados. Elija uno para editarlo o darlo de baja.</p>
     </div>
     <div class="col-md-4 d-grid gap-2 align-content-start">

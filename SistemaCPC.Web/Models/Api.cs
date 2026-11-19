@@ -51,4 +51,10 @@ public static class Formato
     public static string Bs(decimal monto) => $"Bs {monto:0.##}";
     public static string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy");
     public static string Fecha(DateTime fecha) => fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+    public static string ColorEstado(string estado) => estado switch
+    {
+        "Activo" => "text-bg-success",
+        "Inactivo" => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
 }
