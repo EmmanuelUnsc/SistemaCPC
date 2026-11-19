@@ -284,3 +284,53 @@ Content-Type: application/json
   "fechaInicioCobro": "2026-09-01",
   "esTribunal": false
 }
+
+### GET pagos de un afiliado (200)
+GET {{SistemaCPC.Api_HostAddress}}/api/afiliados/0457/pagos
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### GET pagos de un afiliado inexistente (404)
+GET {{SistemaCPC.Api_HostAddress}}/api/afiliados/9999/pagos
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### POST afiliado para borrar (201)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0913",
+  "nombre": "Afiliado para borrar",
+  "carnet": "1000013",
+  "fechaAfiliacion": "2026-10-01",
+  "fechaInicioCobro": "2026-10-01",
+  "esTribunal": false,
+  "contrasena": "clave0913"
+}
+
+### DELETE afiliado sin historial (204)
+DELETE {{SistemaCPC.Api_HostAddress}}/api/afiliados/0913
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### DELETE afiliado con historial (409)
+DELETE {{SistemaCPC.Api_HostAddress}}/api/afiliados/0457
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### DELETE afiliado inexistente (404)
+DELETE {{SistemaCPC.Api_HostAddress}}/api/afiliados/9999
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### Pago de oficina a un afiliado inexistente (404, referencia inválida)
+POST {{SistemaCPC.Api_HostAddress}}/api/pagos/oficina
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "9999",
+  "numeroRecibo": "R-9999",
+  "mesesCubiertos": 1
+}
+
+### Reporte inexistente (404)
+GET {{SistemaCPC.Api_HostAddress}}/api/reportes/otro/excel
+Authorization: Bearer {{directorio.response.body.$.token}}
