@@ -208,3 +208,79 @@ Content-Type: application/json
   "umbralInactividad": 4,
   "topeDefensasMes": 0
 }
+
+### POST afiliado nuevo (201 y Location)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0910",
+  "nombre": "Afiliado de prueba 10",
+  "carnet": "1000010",
+  "fechaAfiliacion": "2026-09-01",
+  "fechaInicioCobro": "2026-09-01",
+  "esTribunal": false,
+  "contrasena": "clave0910"
+}
+
+### POST afiliado sin nombre (400)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0911",
+  "carnet": "1000011",
+  "fechaAfiliacion": "2026-09-01",
+  "fechaInicioCobro": "2026-09-01",
+  "esTribunal": false,
+  "contrasena": "clave0911"
+}
+
+### POST inicio de cobro anterior a la afiliación (400)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0912",
+  "nombre": "Afiliado de prueba 12",
+  "carnet": "1000012",
+  "fechaAfiliacion": "2026-09-01",
+  "fechaInicioCobro": "2026-01-01",
+  "esTribunal": false,
+  "contrasena": "clave0912"
+}
+
+### POST registro repetido (409)
+POST {{SistemaCPC.Api_HostAddress}}/api/afiliados
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "registro": "0910",
+  "nombre": "Afiliado de prueba 10",
+  "carnet": "1000010",
+  "fechaAfiliacion": "2026-09-01",
+  "fechaInicioCobro": "2026-09-01",
+  "esTribunal": false,
+  "contrasena": "clave0910"
+}
+
+### GET afiliado inexistente (404)
+GET {{SistemaCPC.Api_HostAddress}}/api/afiliados/9999
+Authorization: Bearer {{directorio.response.body.$.token}}
+
+### PUT afiliado inexistente (404)
+PUT {{SistemaCPC.Api_HostAddress}}/api/afiliados/9999
+Authorization: Bearer {{directorio.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "nombre": "Afiliado inexistente",
+  "carnet": "1000099",
+  "fechaAfiliacion": "2026-09-01",
+  "fechaInicioCobro": "2026-09-01",
+  "esTribunal": false
+}
