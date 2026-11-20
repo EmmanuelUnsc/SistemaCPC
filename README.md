@@ -24,6 +24,7 @@ y los reportes del directorio.
 |---|---|---|
 | `SistemaCPC.Api` | Web API REST en ASP.NET Core con Entity Framework Core y SQL Server | http://localhost:5100 (Swagger en `/swagger`) |
 | `SistemaCPC.Web` | Pantallas en ASP.NET Core MVC con Bootstrap; llama a la API. Está en el repositorio, pero no forma parte de la entrega de la API | http://localhost:5210 |
+| `SistemaCPC.Migracion` | Programa de consola que carga el Excel del Colegio (RF-21) y compara los saldos con el Excel (RNF-05). Escribe solo en la base `SistemaCPC_Real`: se niega a usar cualquier otra | — |
 
 Dentro de `SistemaCPC.Api`: `Models/` (entidades), `Dtos/` (datos de entrada y salida), `Data/` (contexto de EF Core,
 datos de prueba y migraciones), `Controllers/`, `Patrones/` (patrones de diseño) y `Seguridad/` (token de acceso).
@@ -96,6 +97,31 @@ dotnet run --project SistemaCPC.Web --launch-profile http
 
 En Swagger, primero `POST /api/auth/login` con un usuario de prueba, copiar el `token` de la respuesta, presionar
 **Authorize** y pegarlo. Desde ese momento se pueden probar las demás rutas con los permisos de ese usuario.
+
+### 6. Datos reales del Colegio
+
+El Excel del Colegio y la base `SistemaCPC_Real` nunca van al repositorio: quedan solo en la PC donde se hace la migración.
+
+Para cargar los datos, desde la carpeta del repositorio:
+
+```
+dotnet run --project SistemaCPC.Migracion -- "<ruta del Excel>" "<contraseña del admin>"
+```
+
+- Borra y vuelve a crear `SistemaCPC_Real` en LocalDB y carga afiliados, pagos, ajustes del sistema antiguo y defensas.
+- La contraseña es la del usuario `admin` de la base real. Los afiliados entran con su número de registro y su carnet
+  sin la expedición (si no tienen carnet, con su número de registro).
+- Al terminar muestra el resumen de la comparación con el Excel y deja los informes en la carpeta temporal de Windows
+  (`%TEMP%\SistemaCPC-Migracion`). Opcionales: una tercera cadena de conexión y una cuarta carpeta para los informes,
+  siempre fuera del repositorio.
+
+Para usar el sistema con esos datos: en Visual Studio, abrir `SistemaCPC.sln`, elegir el perfil
+**API + Web (datos reales)** y presionar Iniciar; o desde la terminal, en dos ventanas:
+
+```
+dotnet run --project SistemaCPC.Api --launch-profile http-real
+dotnet run --project SistemaCPC.Web --launch-profile http
+```
 
 ## Usuarios de prueba
 
