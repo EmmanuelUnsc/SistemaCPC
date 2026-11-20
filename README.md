@@ -23,7 +23,7 @@ y los reportes del directorio.
 | Proyecto | Qué es | Dirección |
 |---|---|---|
 | `SistemaCPC.Api` | Web API REST en ASP.NET Core con Entity Framework Core y SQL Server | http://localhost:5100 (Swagger en `/swagger`) |
-| `SistemaCPC.Web` | Pantallas en ASP.NET Core MVC con Bootstrap; llama a la API | http://localhost:5210 |
+| `SistemaCPC.Web` | Pantallas en ASP.NET Core MVC con Bootstrap; llama a la API. Está en el repositorio, pero no forma parte de la entrega de la API | http://localhost:5210 |
 
 Dentro de `SistemaCPC.Api`: `Models/` (entidades), `Dtos/` (datos de entrada y salida), `Data/` (contexto de EF Core,
 datos de prueba y migraciones), `Controllers/`, `Patrones/` (patrones de diseño) y `Seguridad/` (token de acceso).
@@ -57,7 +57,7 @@ Server=localhost,1433;Database=SistemaCPC;User Id=USUARIO;Password=CONTRASEÑA;T
 ### 3. Migraciones
 
 La API aplica las migraciones sola al arrancar (crea la base `SistemaCPC` si no existe). Para aplicarlas a mano,
-desde la carpeta del repositorio:
+desde la carpeta que contiene `SistemaCPC.Api`:
 
 ```
 dotnet ef database update --project SistemaCPC.Api
@@ -74,15 +74,24 @@ Para empezar de cero: `dotnet ef database drop --project SistemaCPC.Api` y volve
 
 ### 5. Ejecutar y abrir Swagger
 
-Con Visual Studio: abrir `SistemaCPC.sln`, elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar
-Iniciar. Desde la terminal, en dos ventanas:
+Solo la API (lo que lleva la entrega). Desde la terminal, en la carpeta que contiene `SistemaCPC.Api`:
+
+```
+dotnet run --project SistemaCPC.Api --launch-profile http
+```
+
+O con Visual Studio: abrir `SistemaCPC.Api/SistemaCPC.Api.csproj` y presionar Iniciar con el perfil **http**.
+
+- Swagger: http://localhost:5100/swagger
+
+Con el repositorio completo, también se pueden levantar la API y la Web juntas: en Visual Studio, abrir `SistemaCPC.sln`,
+elegir el perfil **API + Web** (archivo `SistemaCPC.slnLaunch`) y presionar Iniciar; o desde la terminal, en dos ventanas:
 
 ```
 dotnet run --project SistemaCPC.Api --launch-profile http
 dotnet run --project SistemaCPC.Web --launch-profile http
 ```
 
-- Swagger: http://localhost:5100/swagger
 - Pantallas: http://localhost:5210
 
 En Swagger, primero `POST /api/auth/login` con un usuario de prueba, copiar el `token` de la respuesta, presionar
@@ -119,8 +128,10 @@ Un afiliado solo puede ver su propia información (RF-02).
 | PUT | `/api/pagos/{numeroRecibo}` | CU-05 Corregir pago (queda en la bitácora) | Directorio | Decorator |
 | GET | `/api/afiliados` | CU-06 Gestionar afiliados (lista con estado y deuda) | Directorio | |
 | GET | `/api/afiliados/{registro}` | CU-06 Ver un afiliado | Directorio | |
+| GET | `/api/afiliados/{registro}/pagos` | Pagos de un afiliado (recurso relacionado) | Directorio | |
 | POST | `/api/afiliados` | CU-06 Registrar afiliado (con contraseña inicial; responde 201 con `Location`) | Directorio | |
 | PUT | `/api/afiliados/{registro}` | CU-06 Actualizar afiliado | Directorio | |
+| DELETE | `/api/afiliados/{registro}` | CU-06 Eliminar un afiliado cargado por error (204; 404 si no existe; 409 si tiene pagos, defensas o ajustes) | Directorio | |
 | POST | `/api/afiliados/{registro}/baja` | CU-06 Registrar baja (RF-25) | Directorio | |
 | PUT / GET | `/api/afiliados/{registro}/foto` | CU-06 Guardar y ver la foto (JPG o PNG, hasta 2 MB) | Directorio | |
 | GET | `/api/reportes/defensas?desde=&hasta=` | CU-09 Defensas del período | Directorio | Builder |
@@ -147,7 +158,7 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 | Factory Method | `SistemaCPC.Api/Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
 | Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
 | Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
-| Proxy | `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` (inicio de sesión) y `ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
+| Proxy | En `SistemaCPC.Web` (repositorio, no en la entrega de la API): `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` (inicio de sesión) y `ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
 | Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
 | Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
 | Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |
