@@ -13,5 +13,20 @@
         "DebugTarget": "http"
       }
     ]
+  },
+  {
+    "Name": "API + Web (datos reales)",
+    "Projects": [
+      {
+        "Path": "SistemaCPC.Api\\SistemaCPC.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "http-real"
+      },
+      {
+        "Path": "SistemaCPC.Web\\SistemaCPC.Web.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      }
+    ]
   }
 ]
