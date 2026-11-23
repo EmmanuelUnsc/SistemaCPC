@@ -24,7 +24,16 @@
 @if (Model.Afiliado is { } afiliado)
 {
     <p>Afiliado: <strong>@afiliado.Nombre</strong> (@afiliado.Registro) &nbsp;|&nbsp; Estado: <span class="badge @Formato.ColorEstado(afiliado.Estado)">@afiliado.Estado</span>
-        &nbsp;|&nbsp; Deuda: <strong>@Formato.Bs(afiliado.Deuda)</strong></p>
+        &nbsp;|&nbsp;
+        @if (afiliado.Deuda < 0)
+        {
+            <span>Saldo a favor: <strong class="text-success">@Formato.Bs(-afiliado.Deuda)</strong></span>
+        }
+        else
+        {
+            <span>Deuda: <strong>@Formato.Bs(afiliado.Deuda)</strong></span>
+        }
+    </p>
 
     <form method="post" id="formulario-pago">
         <input type="hidden" name="registro" value="@afiliado.Registro" />

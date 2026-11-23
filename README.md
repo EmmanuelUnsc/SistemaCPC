@@ -184,7 +184,7 @@ Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpe
 | Factory Method | `SistemaCPC.Api/Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
 | Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
 | Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
-| Proxy | En `SistemaCPC.Web` (repositorio, no en la entrega de la API): `SistemaCPC.Web/Patrones/Proxy/ServicioAutenticacion.cs` (inicio de sesión) y `ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
+| Proxy | En `SistemaCPC.Web` (repositorio, no en la entrega de la API): `SistemaCPC.Web/Servicios/ServicioAutenticacion.cs` (inicio de sesión) y `SistemaCPC.Web/Servicios/ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
 | Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
 | Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
 | Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |

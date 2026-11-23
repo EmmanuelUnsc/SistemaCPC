@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SistemaCPC.Web.Models;
 
-namespace SistemaCPC.Web.Patrones.Proxy;
+namespace SistemaCPC.Web.Servicios;
 
 public record RespuestaApi<T>(T? Datos, string? Error)
 {

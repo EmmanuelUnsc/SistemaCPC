@@ -1,7 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SistemaCPC.Web.Filtros;
-using SistemaCPC.Web.Patrones.Proxy;
+using SistemaCPC.Web.Servicios;
 
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;

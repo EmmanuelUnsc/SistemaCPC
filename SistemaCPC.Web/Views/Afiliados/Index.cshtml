@@ -31,7 +31,16 @@
                                 <img src="@Url.Action("Foto", new { id = a.Registro })" alt="Foto de @a.Nombre" width="40" height="40" class="rounded object-fit-cover" />
                             }
                         </td>
-                        <td>@a.Registro</td><td>@a.Nombre</td><td><span class="badge @Formato.ColorEstado(a.Estado)">@a.Estado</span></td><td class="text-nowrap">@Formato.Bs(a.Deuda)</td>
+                        <td>@a.Registro</td><td>@a.Nombre</td><td><span class="badge @Formato.ColorEstado(a.Estado)">@a.Estado</span></td><td class="text-nowrap">
+                            @if (a.Deuda < 0)
+                            {
+                                <span class="text-success">Saldo a favor @Formato.Bs(-a.Deuda)</span>
+                            }
+                            else
+                            {
+                                @Formato.Bs(a.Deuda)
+                            }
+                        </td>
                         <td>@(a.EsTribunal ? "Sí" : "No")</td>
                     </tr>
                 }

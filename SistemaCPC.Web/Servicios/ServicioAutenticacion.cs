@@ -1,7 +1,7 @@
 using System.Net;
 using SistemaCPC.Web.Models;
 
-namespace SistemaCPC.Web.Patrones.Proxy;
+namespace SistemaCPC.Web.Servicios;
 
 public record ResultadoLogin(LoginRespuesta? Usuario, string? Error);
 

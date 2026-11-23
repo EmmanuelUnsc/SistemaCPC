@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SistemaCPC.Web.Models;
-using SistemaCPC.Web.Patrones.Proxy;
+using SistemaCPC.Web.Servicios;
 
 namespace SistemaCPC.Web.Controllers;
 
