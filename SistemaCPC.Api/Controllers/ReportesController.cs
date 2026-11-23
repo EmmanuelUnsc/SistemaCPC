@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Dtos;
-using SistemaCPC.Api.Patrones.Adapter;
-using SistemaCPC.Api.Patrones.Builder;
-using SistemaCPC.Api.Patrones.Facade;
-using SistemaCPC.Api.Patrones.Singleton;
+using SistemaCPC.Api.Reportes;
+using SistemaCPC.Api.Servicios;
 
 namespace SistemaCPC.Api.Controllers;
 

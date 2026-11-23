@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
-using SistemaCPC.Api.Patrones.Singleton;
 
-namespace SistemaCPC.Api.Patrones.Facade;
+namespace SistemaCPC.Api.Servicios;
 
 public record ResumenAfiliado(EstadoAfiliado Estado, int MesesAdeudados, decimal Deuda);
 

@@ -1,7 +1,6 @@
-using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
 
-namespace SistemaCPC.Api.Patrones.Singleton;
+namespace SistemaCPC.Api.Configuracion;
 
 // Patrón Singleton
 public class ParametrosSistema

@@ -2,13 +2,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
-using SistemaCPC.Api.Patrones.Adapter;
-using SistemaCPC.Api.Patrones.Builder;
-using SistemaCPC.Api.Patrones.Decorator;
-using SistemaCPC.Api.Patrones.Facade;
-using SistemaCPC.Api.Patrones.Singleton;
+using SistemaCPC.Api.Reportes;
 using SistemaCPC.Api.Seguridad;
+using SistemaCPC.Api.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 

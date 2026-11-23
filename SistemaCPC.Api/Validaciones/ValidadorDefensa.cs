@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Dtos;
-using SistemaCPC.Api.Patrones.Singleton;
 
-namespace SistemaCPC.Api.Patrones.ChainOfResponsibility;
+namespace SistemaCPC.Api.Validaciones;
 
 // Patrón Chain of Responsibility
 public abstract class ValidadorDefensa

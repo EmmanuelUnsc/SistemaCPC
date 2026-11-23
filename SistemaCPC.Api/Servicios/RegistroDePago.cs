@@ -1,9 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
-using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
-using SistemaCPC.Api.Patrones.Singleton;
 
-namespace SistemaCPC.Api.Patrones.FactoryMethod;
+namespace SistemaCPC.Api.Servicios;
 
 // Patrón Factory Method
 public abstract class RegistroDePago
@@ -18,7 +18,7 @@ public abstract class RegistroDePago
     }
 
     // Factory Method: método de fábrica
-    protected abstract Pago CrearRecibo();
+    protected abstract Task<Pago> CrearRecibo();
 
     // Template Method: operación gancho
     protected virtual DateOnly FechaDelPago() => DateOnly.FromDateTime(DateTime.Today);
@@ -31,7 +31,7 @@ public abstract class RegistroDePago
             throw new ArgumentException("Los meses cubiertos deben ser al menos 1.");
         }
 
-        var pago = CrearRecibo();
+        var pago = await CrearRecibo();
         pago.AfiliadoId = afiliado.Id;
         pago.Fecha = FechaDelPago();
         pago.MesesCubiertos = mesesCubiertos;
@@ -48,9 +48,9 @@ public class RegistroPagoPlataforma : RegistroDePago
     public RegistroPagoPlataforma(CpcContext context, ParametrosSistema parametros)
         : base(context, parametros) { }
 
-    protected override Pago CrearRecibo()
+    protected override async Task<Pago> CrearRecibo()
     {
-        var numero = Context.Pagos.Count(p => p.Origen == OrigenPago.Plataforma) + 1;
+        var numero = await Context.Pagos.CountAsync(p => p.Origen == OrigenPago.Plataforma) + 1;
         return new Pago { NumeroRecibo = $"P-{numero:0000}", Origen = OrigenPago.Plataforma };
     }
 }
@@ -67,9 +67,9 @@ public class RegistroPagoOficina : RegistroDePago
         _fecha = fecha;
     }
 
-    protected override Pago CrearRecibo()
+    protected override Task<Pago> CrearRecibo()
     {
-        return new Pago { NumeroRecibo = _numeroRecibo, Origen = OrigenPago.Oficina };
+        return Task.FromResult(new Pago { NumeroRecibo = _numeroRecibo, Origen = OrigenPago.Oficina });
     }
 
     protected override DateOnly FechaDelPago() => _fecha ?? base.FechaDelPago();

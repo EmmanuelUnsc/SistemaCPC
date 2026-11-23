@@ -27,7 +27,9 @@ y los reportes del directorio.
 | `SistemaCPC.Migracion` | Programa de consola que carga el Excel del Colegio (RF-21) y compara los saldos con el Excel (RNF-05). Escribe solo en la base `SistemaCPC_Real`: se niega a usar cualquier otra | — |
 
 Dentro de `SistemaCPC.Api`: `Models/` (entidades), `Dtos/` (datos de entrada y salida), `Data/` (contexto de EF Core,
-datos de prueba y migraciones), `Controllers/`, `Patrones/` (patrones de diseño) y `Seguridad/` (token de acceso).
+datos de prueba y migraciones), `Controllers/`, `Servicios/` (estado de cuenta, registro de pagos y ajustes con bitácora),
+`Reportes/` (reportes y exportación a Excel), `Validaciones/` (reglas para registrar una defensa), `Configuracion/`
+(parámetros del sistema) y `Seguridad/` (token de acceso).
 
 ## Configuración local
 
@@ -176,20 +178,20 @@ La clave con la que se firman los tokens está en `SistemaCPC.Api/appsettings.js
 
 ## Patrones de diseño
 
-Los patrones elegidos en las dinámicas de Ingeniería de Software, en las carpetas `Patrones/`:
+Los patrones elegidos en las dinámicas de Ingeniería de Software. Cada clase está en la carpeta de su responsabilidad:
 
 | Patrón | Archivo | Caso de uso |
 |---|---|---|
-| Singleton | `SistemaCPC.Api/Patrones/Singleton/ParametrosSistema.cs` (registrado con `AddSingleton`) | CU-02, CU-03, CU-07, CU-09 |
-| Factory Method | `SistemaCPC.Api/Patrones/FactoryMethod/RegistroDePago.cs` | CU-04 y CU-05 |
-| Builder | `SistemaCPC.Api/Patrones/Builder/ConstructorReporte.cs` | CU-09 |
-| Facade | `SistemaCPC.Api/Patrones/Facade/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
+| Singleton | `SistemaCPC.Api/Configuracion/ParametrosSistema.cs` (registrado con `AddSingleton`) | CU-02, CU-03, CU-07, CU-09 |
+| Factory Method | `SistemaCPC.Api/Servicios/RegistroDePago.cs` | CU-04 y CU-05 |
+| Builder | `SistemaCPC.Api/Reportes/ConstructorReporte.cs` | CU-09 |
+| Facade | `SistemaCPC.Api/Servicios/EstadoDeCuenta.cs` (también la usan los reportes) | CU-02 y CU-03 |
 | Proxy | En `SistemaCPC.Web` (repositorio, no en la entrega de la API): `SistemaCPC.Web/Servicios/ServicioAutenticacion.cs` (inicio de sesión) y `SistemaCPC.Web/Servicios/ProxyApi.cs` (el resto: agrega el token y lo renueva) | CU-01 y cada caso de uso que la Web conecta a la API |
-| Decorator | `SistemaCPC.Api/Patrones/Decorator/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
-| Adapter | `SistemaCPC.Api/Patrones/Adapter/ExportadorExcel.cs` (ClosedXML) | CU-09 |
-| Chain of Responsibility | `SistemaCPC.Api/Patrones/ChainOfResponsibility/ValidadorDefensa.cs` | CU-07 |
-| Template Method | `RegistroDePago.Registrar` en `Patrones/FactoryMethod/RegistroDePago.cs` (con la operación gancho `FechaDelPago`) | CU-04 y CU-05 |
-| Iterator | `foreach` y LINQ de C# en los reportes (`Patrones/Builder/ConstructorReporte.cs`) | CU-09 |
+| Decorator | `SistemaCPC.Api/Servicios/ServicioAjustes.cs` (`ServicioConBitacora`) | CU-10 y la corrección de pagos de CU-05 |
+| Adapter | `SistemaCPC.Api/Reportes/ExportadorExcel.cs` (ClosedXML) | CU-09 |
+| Chain of Responsibility | `SistemaCPC.Api/Validaciones/ValidadorDefensa.cs` | CU-07 |
+| Template Method | `RegistroDePago.Registrar` en `SistemaCPC.Api/Servicios/RegistroDePago.cs` (con la operación gancho `FechaDelPago`) | CU-04 y CU-05 |
+| Iterator | `foreach` y LINQ de C# en los reportes (`SistemaCPC.Api/Reportes/ConstructorReporte.cs`) | CU-09 |
 
 Cada patrón está marcado en el código con un comentario `// Patrón …`.
 

@@ -1,9 +1,7 @@
 using SistemaCPC.Api.Data;
-using SistemaCPC.Api.Dtos;
 using SistemaCPC.Api.Models;
-using SistemaCPC.Api.Patrones.Facade;
 
-namespace SistemaCPC.Api.Patrones.Decorator;
+namespace SistemaCPC.Api.Servicios;
 
 public interface IServicioAjustes
 {

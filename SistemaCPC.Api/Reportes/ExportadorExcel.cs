@@ -1,8 +1,6 @@
 using ClosedXML.Excel;
-using SistemaCPC.Api.Dtos;
-using SistemaCPC.Api.Patrones.Builder;
 
-namespace SistemaCPC.Api.Patrones.Adapter;
+namespace SistemaCPC.Api.Reportes;
 
 public interface IExportador
 {
