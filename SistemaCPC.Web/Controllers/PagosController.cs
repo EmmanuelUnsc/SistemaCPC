@@ -47,10 +47,10 @@ public class PagosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Corregir(string registro, string numeroRecibo, int mesesCubiertos, decimal aporte, string? motivo)
+    public async Task<IActionResult> Corregir(string registro, string numeroRecibo, int mesesCubiertos, decimal monto, string? motivo)
     {
         var pago = await _api.Enviar<PagoRegistrado>(HttpMethod.Put, $"api/pagos/{numeroRecibo}",
-            new { mesesCubiertos, monto = mesesCubiertos * aporte, motivo = motivo ?? string.Empty });
+            new { mesesCubiertos, monto, motivo = motivo ?? string.Empty });
 
         Avisar(pago.Error, pago.Correcta ? $"Pago {numeroRecibo} corregido; la corrección quedó en la bitácora." : null);
         return RedirectToAction(nameof(Index), new { registro });

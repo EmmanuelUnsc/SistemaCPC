@@ -37,7 +37,6 @@
 
     <form method="post" id="formulario-pago">
         <input type="hidden" name="registro" value="@afiliado.Registro" />
-        <input type="hidden" name="aporte" id="aporte" value="@afiliado.AporteMensual" />
         <div class="row">
             <div class="col-md-6">
                 <div class="row g-2">
@@ -55,7 +54,9 @@
                     </div>
                     <div class="col-6">
                         <label class="form-label" for="f-monto">Monto (Bs)</label>
-                        <input class="form-control" id="f-monto" value="@afiliado.AporteMensual.ToString("0.##")" readonly />
+                        <input class="form-control" id="f-monto" name="monto" value="@afiliado.AporteMensual.ToString("0.##")"
+                               data-aporte="@afiliado.AporteMensual.ToString("0.##")" />
+                        <div class="form-text">Al registrar se calcula con los meses; al corregir se guarda este monto.</div>
                     </div>
                     <div class="col-12">
                         <label class="form-label" for="f-motivo">Motivo (solo para corregir)</label>
@@ -92,7 +93,7 @@
                     </div>
                 }
                 <button type="submit" class="btn btn-outline-primary" asp-action="Corregir">Corregir pago</button>
-                <p class="text-muted small mt-2">Elija el pago en la tabla, cambie los meses y escriba el motivo. Cada corrección queda en la bitácora.</p>
+                <p class="text-muted small mt-2">Elija el pago en la tabla, cambie los meses o el monto y escriba el motivo. Cada corrección queda en la bitácora.</p>
             </div>
         </div>
     </form>
@@ -101,9 +102,9 @@
 @section Scripts {
     <script>
         const campoMeses = document.getElementById("f-meses");
+        const campoMonto = document.getElementById("f-monto");
         campoMeses?.addEventListener("input", () => {
-            const aporte = Number(document.getElementById("aporte").value);
-            document.getElementById("f-monto").value = (Number(campoMeses.value) || 0) * aporte;
+            campoMonto.value = (Number(campoMeses.value) || 0) * Number(campoMonto.dataset.aporte);
         });
     </script>
 }
