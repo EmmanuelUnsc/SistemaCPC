@@ -50,8 +50,13 @@ public class RegistroPagoPlataforma : RegistroDePago
 
     protected override async Task<Pago> CrearRecibo()
     {
-        var numero = await Context.Pagos.CountAsync(p => p.Origen == OrigenPago.Plataforma) + 1;
-        return new Pago { NumeroRecibo = $"P-{numero:0000}", Origen = OrigenPago.Plataforma };
+        var recibos = await Context.Pagos
+     .Where(p => p.NumeroRecibo.StartsWith("P-"))
+     .Select(p => p.NumeroRecibo)
+     .ToListAsync();
+        var mayor = recibos.Select(r => int.TryParse(r[2..], out var numero) ? numero : 0).DefaultIfEmpty(0).Max();
+        return new Pago { NumeroRecibo = $"P-{mayor + 1:0000}", Origen = OrigenPago.Plataforma };
+        
     }
 }
 

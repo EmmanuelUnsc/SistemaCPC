@@ -106,10 +106,11 @@ public class PagosController : ControllerBase
             return BadRequest(new ErrorRespuesta("El número de recibo es obligatorio."));
         }
 
-        if (solicitud.Fecha > DateOnly.FromDateTime(DateTime.Today))
+        if (solicitud.NumeroRecibo.Replace(" ", string.Empty).StartsWith("P-", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new ErrorRespuesta("La fecha del recibo no puede ser posterior a hoy."));
+            return BadRequest(new ErrorRespuesta("Los recibos que empiezan con «P-» son de la plataforma; escriba el número del recibo físico."));
         }
+
 
         if (await _context.Pagos.AnyAsync(p => p.NumeroRecibo == solicitud.NumeroRecibo))
         {
