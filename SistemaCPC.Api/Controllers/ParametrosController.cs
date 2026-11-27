@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SistemaCPC.Api.Configuracion;
 using SistemaCPC.Api.Data;
 using SistemaCPC.Api.Dtos;
+using SistemaCPC.Api.Servicios;
 
 namespace SistemaCPC.Api.Controllers;
 
@@ -16,12 +17,15 @@ public class ParametrosController : ControllerBase
 {
     private readonly ParametrosSistema _parametros;
     private readonly CpcContext _context;
+    private readonly ServicioBitacora _bitacora;
 
-    public ParametrosController(ParametrosSistema parametros, CpcContext context)
+    public ParametrosController(ParametrosSistema parametros, CpcContext context, ServicioBitacora bitacora)
     {
         _parametros = parametros;
         _context = context;
+        _bitacora = bitacora;
     }
+
 
     [HttpGet]
     [EndpointSummary("Parámetros de los cálculos (aporte, monto por defensa, umbral y tope)")]
@@ -43,13 +47,26 @@ public class ParametrosController : ControllerBase
         }
 
         var guardados = await _context.Parametros.FirstAsync();
+        var usuario = User.Identity!.Name!;
+        AnotarCambio(usuario, "aporte mensual", guardados.AporteMensual, solicitud.AporteMensual);
+        AnotarCambio(usuario, "monto por defensa", guardados.MontoPorDefensa, solicitud.MontoPorDefensa);
+        AnotarCambio(usuario, "umbral de inactividad", guardados.UmbralInactividad, solicitud.UmbralInactividad);
+        AnotarCambio(usuario, "tope de defensas por mes", guardados.TopeDefensasMes, solicitud.TopeDefensasMes);
+
         guardados.AporteMensual = solicitud.AporteMensual;
-        guardados.MontoPorDefensa = solicitud.MontoPorDefensa;
-        guardados.UmbralInactividad = solicitud.UmbralInactividad;
-        guardados.TopeDefensasMes = solicitud.TopeDefensasMes;
+        
         await _context.SaveChangesAsync();
 
         _parametros.Cargar(guardados);
         return _parametros;
     }
+
+    private void AnotarCambio(string usuario, string parametro, decimal anterior, decimal nuevo)
+    {
+        if (anterior != nuevo)
+        {
+            _bitacora.Anotar(usuario, $"Parámetro {parametro}", anterior, nuevo);
+        }
+    }
 }
+

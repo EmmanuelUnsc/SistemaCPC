@@ -52,6 +52,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<CpcContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CpcConexion")));
+builder.Services.AddScoped<ServicioBitacora>();
 
 // Patrón Singleton
 builder.Services.AddSingleton<ParametrosSistema>();

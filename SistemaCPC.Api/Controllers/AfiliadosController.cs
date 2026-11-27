@@ -22,11 +22,13 @@ public class AfiliadosController : ControllerBase
 
     private readonly CpcContext _context;
     private readonly EstadoDeCuenta _estadoDeCuenta;
+    private readonly ServicioBitacora _bitacora;
 
-    public AfiliadosController(CpcContext context, EstadoDeCuenta estadoDeCuenta)
+    public AfiliadosController(CpcContext context, EstadoDeCuenta estadoDeCuenta, ServicioBitacora bitacora)
     {
         _context = context;
         _estadoDeCuenta = estadoDeCuenta;
+        _bitacora = bitacora;
     }
 
     [HttpGet]
@@ -141,6 +143,9 @@ public class AfiliadosController : ControllerBase
             }
         }
 
+        var cobroAnterior = afiliado.FechaInicioCobro;
+        var deudaAnterior = _estadoDeCuenta.Resumir(afiliado).Deuda;
+
         afiliado.Nombre = solicitud.Nombre.Trim();
         afiliado.Carnet = (solicitud.Carnet ?? string.Empty).Trim();
         afiliado.FechaAfiliacion = solicitud.FechaAfiliacion!.Value;
@@ -150,6 +155,13 @@ public class AfiliadosController : ControllerBase
         if (!string.IsNullOrEmpty(solicitud.Contrasena))
         {
             afiliado.ContrasenaCifrada = new PasswordHasher<Usuario>().HashPassword(afiliado, solicitud.Contrasena);
+        }
+
+        if (afiliado.FechaInicioCobro != cobroAnterior)
+        {
+            _bitacora.Anotar(User.Identity!.Name!,
+                $"Inicio de cobro ({afiliado.Registro}): {cobroAnterior:dd/MM/yyyy} a {afiliado.FechaInicioCobro:dd/MM/yyyy}",
+                deudaAnterior, _estadoDeCuenta.Resumir(afiliado).Deuda);
         }
 
         await _context.SaveChangesAsync();
