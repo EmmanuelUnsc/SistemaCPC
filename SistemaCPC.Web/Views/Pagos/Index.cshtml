@@ -94,6 +94,22 @@
                 }
                 <button type="submit" class="btn btn-outline-primary" asp-action="Corregir">Corregir pago</button>
                 <p class="text-muted small mt-2">Elija el pago en la tabla, cambie los meses o el monto y escriba el motivo. Cada corrección queda en la bitácora.</p>
+
+                @if (afiliado.Ajustes.Count > 0)
+                {
+                    <h2 class="h6">Ajustes</h2>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead><tr><th>Tipo</th><th>Fecha</th><th>Monto</th><th>Motivo</th></tr></thead>
+                            <tbody>
+                                @foreach (var ajuste in afiliado.Ajustes)
+                                {
+                                    <tr><td>@ajuste.Tipo</td><td>@Formato.Fecha(ajuste.Fecha)</td><td>@Formato.Bs(ajuste.Monto)</td><td>@ajuste.Motivo</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             </div>
         </div>
     </form>

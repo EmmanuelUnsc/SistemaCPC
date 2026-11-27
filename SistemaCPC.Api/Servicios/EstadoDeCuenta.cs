@@ -46,8 +46,13 @@ public class EstadoDeCuenta
         var resumen = Resumir(afiliado);
         var pagos = afiliado.Pagos
             .OrderByDescending(p => p.Fecha)
-            .Select(p => new PagoDelHistorial(p.NumeroRecibo, p.Fecha, p.Monto, p.MesesCubiertos))
+                        .Select(p => new PagoDelHistorial(p.NumeroRecibo, p.Fecha, p.Monto, p.MesesCubiertos))
             .ToList();
+        var ajustes = afiliado.Ajustes
+            .OrderByDescending(a => a.Fecha)
+            .Select(a => new AjusteDelHistorial(a.Tipo, a.Fecha, a.Monto, a.Motivo))
+            .ToList();
+            
 
         var aporte = _parametros.AporteMensual;
         var porAnio = afiliado.ListarMesesAdeudados(aporte, Hoy)
@@ -56,7 +61,7 @@ public class EstadoDeCuenta
             .ToList();
 
         return new EstadoCuentaRespuesta(afiliado.Registro, afiliado.Nombre, resumen.Estado.ToString(),
-            resumen.MesesAdeudados, resumen.Deuda, aporte, porAnio, pagos);
+                        resumen.MesesAdeudados, resumen.Deuda, aporte, porAnio, pagos, ajustes);
     }
 
     private static string NombreDelMes(DateOnly mes)
