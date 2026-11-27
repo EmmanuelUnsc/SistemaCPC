@@ -54,7 +54,7 @@
                     </div>
                     <div class="col-6">
                         <label class="form-label" for="f-monto">Monto (Bs)</label>
-                        <input class="form-control" id="f-monto" name="monto" value="@afiliado.AporteMensual.ToString("0.##")"
+                        <input class="form-control" id="f-monto" name="monto" inputmode="decimal" value="@afiliado.AporteMensual.ToString("0.##")"
                                data-aporte="@afiliado.AporteMensual.ToString("0.##")" />
                         <div class="form-text">Al registrar se calcula con los meses; al corregir se guarda este monto.</div>
                     </div>
@@ -101,7 +101,7 @@
 
 @section Scripts {
     <script>
-        const campoMeses = document.getElementById("f-meses");
+               const campoMeses = document.getElementById("f-meses");
         const campoMonto = document.getElementById("f-monto");
         campoMeses?.addEventListener("input", () => {
             campoMonto.value = (Number(campoMeses.value) || 0) * Number(campoMonto.dataset.aporte);

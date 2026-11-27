@@ -8,7 +8,11 @@ CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews(opciones => opciones.Filters.Add<FiltroErroresApi>());
+builder.Services.AddControllersWithViews(opciones =>
+{
+    opciones.Filters.Add<FiltroErroresApi>();
+    opciones.ModelBinderProviders.Insert(0, new ProveedorBinderDecimal());
+});
 
 builder.Services.AddHttpClient("Api", cliente =>
     cliente.BaseAddress = new Uri(builder.Configuration["ApiUrl"]!));
