@@ -35,6 +35,7 @@ public class FormularioAfiliado
 {
     public string Modo { get; set; } = string.Empty;
     public string Registro { get; set; } = string.Empty;
+    public string RegistroOriginal { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string Carnet { get; set; } = string.Empty;
     public DateOnly? FechaAfiliacion { get; set; }

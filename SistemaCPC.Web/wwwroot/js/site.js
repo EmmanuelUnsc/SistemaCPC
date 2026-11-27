@@ -12,6 +12,8 @@
                 control.value = valor;
             }
         }
+
+        document.querySelectorAll("[data-solo-al-crear]").forEach(control => control.readOnly = true);
     });
 });
 
@@ -27,5 +29,7 @@ document.querySelectorAll("[data-limpiar]").forEach(boton => {
                 control.value = "";
             }
         });
+
+        document.querySelectorAll("[data-solo-al-crear]").forEach(control => control.readOnly = false);
     });
 });

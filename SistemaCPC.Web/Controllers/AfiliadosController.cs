@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Win32;
 using SistemaCPC.Web.Models;
 using SistemaCPC.Web.Servicios;
 
@@ -26,15 +27,24 @@ public class AfiliadosController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Guardar(FormularioAfiliado formulario)
     {
-        var datos = new
-        {
-            formulario.Registro, formulario.Nombre, formulario.Carnet, formulario.FechaAfiliacion,
-            formulario.FechaInicioCobro, formulario.EsTribunal, formulario.Contrasena
-        };
+      
 
         var editar = formulario.Modo == "editar";
+        var registro = editar ? formulario.RegistroOriginal : formulario.Registro;
+
+        var datos = new
+        {
+            Registro = registro,
+            formulario.Nombre,
+            formulario.Carnet,
+            formulario.FechaAfiliacion,
+            formulario.FechaInicioCobro,
+            formulario.EsTribunal,
+            formulario.Contrasena
+        };
+
         var guardado = editar
-            ? await _api.Enviar<AfiliadoDatos>(HttpMethod.Put, $"api/afiliados/{formulario.Registro}", datos)
+            ? await _api.Enviar<AfiliadoDatos>(HttpMethod.Put, $"api/afiliados/{registro}", datos)
             : await _api.Enviar<AfiliadoDatos>(HttpMethod.Post, "api/afiliados", datos);
 
         if (!guardado.Correcta)
@@ -45,7 +55,7 @@ public class AfiliadosController : Controller
 
         if (formulario.Foto is { Length: > 0 })
         {
-            var foto = await _api.EnviarArchivo($"api/afiliados/{formulario.Registro}/foto", "foto", formulario.Foto);
+            var foto = await _api.EnviarArchivo($"api/afiliados/{registro}/foto", "foto", formulario.Foto);
 
             if (!foto.Correcta)
             {
@@ -55,8 +65,8 @@ public class AfiliadosController : Controller
         }
 
         TempData["Mensaje"] = editar
-            ? $"Afiliado {formulario.Registro} actualizado."
-            : $"Afiliado {formulario.Registro} registrado; ya puede iniciar sesión con su contraseña inicial.";
+                       ? $"Afiliado {registro} actualizado."
+            : $"Afiliado {registro} registrado; ya puede iniciar sesión con su contraseña inicial.";
         return RedirectToAction(nameof(Index));
     }
 
