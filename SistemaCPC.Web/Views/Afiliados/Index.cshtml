@@ -3,6 +3,11 @@
     ViewData["Title"] = "Afiliados";
     var hoy = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
     string Iso(DateOnly? fecha) => fecha?.ToString("yyyy-MM-dd") ?? string.Empty;
+    var pagina = (int)(ViewData["Pagina"] ?? 1);
+    var paginas = (int)(ViewData["Paginas"] ?? 1);
+    var desde = (int)(ViewData["Desde"] ?? 0);
+    var primera = Math.Max(1, Math.Min(pagina - 2, paginas - 4));
+    var ultima = Math.Min(paginas, primera + 4);
 }
 
 <h1>Afiliados</h1>
@@ -12,8 +17,7 @@
     <div class="alert alert-danger">@ViewData["Error"]</div>
 }
 
-<div class="row mb-4">
-    <div class="col-md-8">
+<div class="mb-4">
         <div class="table-responsive">
         <table class="table table-sm table-striped seleccionable align-middle">
             <thead>
@@ -47,12 +51,29 @@
             </tbody>
         </table>
         </div>
-        <p class="text-muted small">@Model.Count afiliados. Elija uno para editarlo o darlo de baja.</p>
-    </div>
-    <div class="col-md-4 d-grid gap-2 align-content-start">
-        <button type="button" class="btn btn-success" data-limpiar>Nuevo afiliado</button>
-        <button type="submit" class="btn btn-outline-danger" form="formulario-afiliado" asp-action="Baja" formnovalidate>Dar de baja</button>
-    </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <p class="text-muted small mb-0">Afiliados @desde a @(desde + Model.Count - 1) de @ViewData["Total"]. Elija uno para editarlo o darlo de baja.</p>
+            @if (paginas > 1)
+            {
+                <nav aria-label="Páginas de afiliados">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(pagina == 1 ? "disabled" : "")"><a class="page-link" asp-action="Index" asp-route-pagina="1">Primera</a></li>
+                        <li class="page-item @(pagina == 1 ? "disabled" : "")"><a class="page-link" asp-action="Index" asp-route-pagina="@(pagina - 1)">Anterior</a></li>
+                        @for (var i = primera; i <= ultima; i++)
+                        {
+                            <li class="page-item @(i == pagina ? "active" : "")"><a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a></li>
+                        }
+                        <li class="page-item @(pagina == paginas ? "disabled" : "")"><a class="page-link" asp-action="Index" asp-route-pagina="@(pagina + 1)">Siguiente</a></li>
+                        <li class="page-item @(pagina == paginas ? "disabled" : "")"><a class="page-link" asp-action="Index" asp-route-pagina="@paginas">Última</a></li>
+                    </ul>
+                </nav>
+            }
+        </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h5 mb-0">Datos del afiliado</h2>
+    <button type="button" class="btn btn-success" data-limpiar>Nuevo afiliado</button>
 </div>
 
 <form asp-action="Guardar" method="post" enctype="multipart/form-data" id="formulario-afiliado" class="row g-3">
@@ -93,15 +114,19 @@
         <label class="form-label" for="f-foto">Foto (JPG o PNG, hasta 2 MB)</label>
         <input type="file" class="form-control" id="f-foto" name="foto" accept="image/jpeg,image/png" />
     </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+    <div class="col-12"><hr class="my-1" /><h2 class="h6 mb-0">Dar de baja</h2></div>
     <div class="col-md-3">
-        <label class="form-label" for="f-baja">Baja</label>
+        <label class="form-label" for="f-baja">Motivo</label>
         <select class="form-select" id="f-baja" name="baja"><option></option><option>Renuncia</option><option>Fallecimiento</option></select>
     </div>
     <div class="col-md-3">
         <label class="form-label" for="f-fechabaja">Fecha de baja</label>
         <input type="date" class="form-control" id="f-fechabaja" name="fechaBaja" max="@hoy" />
     </div>
-    <div class="col-12">
-        <button type="submit" class="btn btn-primary">Guardar</button>
+    <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-outline-danger" asp-action="Baja" formnovalidate>Dar de baja</button>
     </div>
 </form>

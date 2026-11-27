@@ -15,11 +15,27 @@ public class AfiliadosController : Controller
         _api = api;
     }
 
-    public async Task<IActionResult> Index()
+    private const int PorPagina = 20;
+
+    public async Task<IActionResult> Index(int pagina = 1, string? registro = null)
     {
         var afiliados = await _api.Obtener<List<AfiliadoDatos>>("api/afiliados");
         ViewData["Error"] = afiliados.Error;
-        return View(afiliados.Datos ?? new());
+        var todos = afiliados.Datos ?? new();
+
+        var posicion = string.IsNullOrEmpty(registro) ? -1 : todos.FindIndex(a => a.Registro == registro);
+        if (posicion >= 0)
+        {
+            pagina = posicion / PorPagina + 1;
+        }
+
+        var paginas = Math.Max(1, (int)Math.Ceiling(todos.Count / (double)PorPagina));
+        pagina = Math.Clamp(pagina, 1, paginas);
+        ViewData["Pagina"] = pagina;
+        ViewData["Paginas"] = paginas;
+        ViewData["Total"] = todos.Count;
+        ViewData["Desde"] = todos.Count == 0 ? 0 : (pagina - 1) * PorPagina + 1;
+        return View(todos.Skip((pagina - 1) * PorPagina).Take(PorPagina).ToList());
     }
 
     [HttpPost]
@@ -66,13 +82,19 @@ public class AfiliadosController : Controller
         TempData["Mensaje"] = editar
                        ? $"Afiliado {registro} actualizado."
             : $"Afiliado {registro} registrado; ya puede iniciar sesión con su contraseña inicial.";
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { registro });
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Baja(FormularioAfiliado formulario)
     {
+        if (string.IsNullOrWhiteSpace(formulario.Registro))
+        {
+            TempData["Error"] = "Elija en la lista al afiliado que quiere dar de baja o escriba su número de registro.";
+            return RedirectToAction(nameof(Index));
+        }
+
         var baja = await _api.Enviar<AfiliadoDatos>(HttpMethod.Post, $"api/afiliados/{formulario.Registro}/baja",
             new { motivo = formulario.Baja ?? string.Empty, fecha = formulario.FechaBaja });
 
@@ -85,7 +107,7 @@ public class AfiliadosController : Controller
             TempData["Error"] = baja.Error;
         }
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(nameof(Index), new { registro = formulario.Registro });
     }
 
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

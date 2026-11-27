@@ -36,9 +36,13 @@ public class AfiliadosController : ControllerBase
     [ProducesResponseType<List<AfiliadoRespuesta>>(StatusCodes.Status200OK)]
     public async Task<List<AfiliadoRespuesta>> Listar()
     {
-        var afiliados = await ConDatosDeCuenta().OrderBy(a => a.Registro).ToListAsync();
+        var afiliados = await ConDatosDeCuenta().ToListAsync();
         var conFoto = (await _context.FotosAfiliados.Select(f => f.AfiliadoId).ToListAsync()).ToHashSet();
-        return afiliados.Select(a => Respuesta(a, conFoto.Contains(a.Id))).ToList();
+        return afiliados
+            .OrderBy(a => int.TryParse(a.Registro, out var numero) ? numero : int.MaxValue)
+            .ThenBy(a => a.Registro)
+            .Select(a => Respuesta(a, conFoto.Contains(a.Id)))
+            .ToList();
     }
 
     [HttpGet("{registro}")]
