@@ -84,6 +84,7 @@ public class AuthController : ControllerBase
                 _ => usuario.Registro
             },
             Rol = usuario.Rol.ToString(),
+            EsTribunal = usuario is Afiliado { EsTribunal: true },
             Token = token.Token,
             Vence = token.Vence
         };

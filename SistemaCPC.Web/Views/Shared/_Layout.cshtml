@@ -52,7 +52,10 @@
                     @if (User.IsInRole("Afiliado"))
                     {
                         <li class="nav-item"><a class="@(controlador == "MiCuenta" && accion != "Defensas" ? "nav-link active" : "nav-link")" asp-controller="MiCuenta" asp-action="Index">Mi estado de cuenta</a></li>
-                        <li class="nav-item"><a class="@Activa("MiCuenta", "Defensas")" asp-controller="MiCuenta" asp-action="Defensas">Mis defensas</a></li>
+                            @if (User.HasClaim("EsTribunal", "true"))
+                            {
+                                <li class="nav-item"><a class="@Activa("MiCuenta", "Defensas")" asp-controller="MiCuenta" asp-action="Defensas">Mis defensas</a></li>
+                            }
                     }
                     <li class="nav-item">
                         <form asp-controller="Cuenta" asp-action="Logout" method="post">

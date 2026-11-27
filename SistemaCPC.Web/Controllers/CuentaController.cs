@@ -49,6 +49,12 @@ public class CuentaController : Controller
             claims.Add(new Claim(ClaimTypes.Role, "Directorio"));
         }
 
+        if (usuario.EsTribunal)
+        {
+            claims.Add(new Claim("EsTribunal", "true"));
+        }
+
+
         claims.AddRange(ProxyApi.ClaimsDelToken(usuario));
 
         var identidad = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

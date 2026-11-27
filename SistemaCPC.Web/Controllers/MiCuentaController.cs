@@ -46,5 +46,14 @@ public class MiCuentaController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public IActionResult Defensas() => View();
+    public IActionResult Defensas()
+    {
+        if (!User.HasClaim("EsTribunal", "true"))
+        {
+            TempData["Error"] = "Mis defensas es solo para los afiliados habilitados como tribunal.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View();
+    }
 }
