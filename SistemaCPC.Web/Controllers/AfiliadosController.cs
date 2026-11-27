@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Win32;
 using SistemaCPC.Web.Models;
 using SistemaCPC.Web.Servicios;
 

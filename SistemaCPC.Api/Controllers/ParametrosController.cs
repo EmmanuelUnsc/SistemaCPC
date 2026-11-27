@@ -26,7 +26,6 @@ public class ParametrosController : ControllerBase
         _bitacora = bitacora;
     }
 
-
     [HttpGet]
     [EndpointSummary("Parámetros de los cálculos (aporte, monto por defensa, umbral y tope)")]
     [ProducesResponseType<ParametrosSistema>(StatusCodes.Status200OK)]
@@ -54,7 +53,9 @@ public class ParametrosController : ControllerBase
         AnotarCambio(usuario, "tope de defensas por mes", guardados.TopeDefensasMes, solicitud.TopeDefensasMes);
 
         guardados.AporteMensual = solicitud.AporteMensual;
-        
+        guardados.MontoPorDefensa = solicitud.MontoPorDefensa;
+        guardados.UmbralInactividad = solicitud.UmbralInactividad;
+        guardados.TopeDefensasMes = solicitud.TopeDefensasMes;
         await _context.SaveChangesAsync();
 
         _parametros.Cargar(guardados);
@@ -69,4 +70,3 @@ public class ParametrosController : ControllerBase
         }
     }
 }
-

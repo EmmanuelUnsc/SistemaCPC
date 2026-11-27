@@ -5,7 +5,7 @@ using SistemaCPC.Web.Servicios;
 
 namespace SistemaCPC.Web.Controllers;
 
-[Authorize(Roles = "Superadministrador")]
+[Authorize(Roles = "Directorio")]
 public class AjustesController : Controller
 {
     private readonly ProxyApi _api;
@@ -30,6 +30,7 @@ public class AjustesController : Controller
         return View(pantalla);
     }
 
+    [Authorize(Roles = "Superadministrador")]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Registrar(string registro, string tipo, decimal monto, string? motivo)

@@ -223,8 +223,11 @@ public class AfiliadosController : ControllerBase
             return BadRequest(new ErrorRespuesta("La fecha de baja debe estar entre la afiliación y hoy."));
         }
 
+        var deudaAnterior = _estadoDeCuenta.Resumir(afiliado).Deuda;
         afiliado.FechaBaja = fecha;
         afiliado.MotivoBaja = solicitud.Motivo;
+        _bitacora.Anotar(User.Identity!.Name!, $"Baja por {solicitud.Motivo} ({afiliado.Registro}) desde {fecha:dd/MM/yyyy}",
+            deudaAnterior, _estadoDeCuenta.Resumir(afiliado).Deuda);
         await _context.SaveChangesAsync();
 
         return await RespuestaAsync(afiliado);

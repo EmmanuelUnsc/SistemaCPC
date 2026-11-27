@@ -1,10 +1,17 @@
 @model PantallaAjustes
 @{
-    ViewData["Title"] = "Registrar ajuste";
+    var superadministrador = User.IsInRole("Superadministrador");
+    ViewData["Title"] = superadministrador ? "Registrar ajuste" : "Bitácora";
 }
 
-<h1>Registrar ajuste</h1>
+<h1>@ViewData["Title"]</h1>
 
+@if (!superadministrador)
+{
+    <p class="text-muted">Ajustes y cambios que modifican la deuda, con quién los hizo y los valores antes y después. Solo el superadministrador puede registrar ajustes.</p>
+}
+else
+{
 <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
     <div class="col-md-4">
         <label class="form-label" for="registro">Número de registro</label>
@@ -14,13 +21,14 @@
         <button type="submit" class="btn btn-primary">Buscar</button>
     </div>
 </form>
+}
 
 @if (ViewData["Error"] != null)
 {
     <div class="alert alert-danger">@ViewData["Error"]</div>
 }
 
-@if (Model.Afiliado is { } afiliado)
+@if (superadministrador && Model.Afiliado is { } afiliado)
 {
     <p>Afiliado: <strong>@afiliado.Nombre</strong> (@afiliado.Registro) &nbsp;|&nbsp; Deuda: <strong>@Formato.Bs(afiliado.Deuda)</strong></p>
 

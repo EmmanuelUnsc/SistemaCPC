@@ -111,6 +111,10 @@ public class PagosController : ControllerBase
             return BadRequest(new ErrorRespuesta("Los recibos que empiezan con «P-» son de la plataforma; escriba el número del recibo físico."));
         }
 
+        if (solicitud.Fecha > DateOnly.FromDateTime(DateTime.Today))
+        {
+            return BadRequest(new ErrorRespuesta("La fecha del recibo no puede ser posterior a hoy."));
+        }
 
         if (await _context.Pagos.AnyAsync(p => p.NumeroRecibo == solicitud.NumeroRecibo))
         {

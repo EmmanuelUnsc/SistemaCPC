@@ -44,10 +44,7 @@
                         <li class="nav-item"><a class="@Activa("Defensas")" asp-controller="Defensas" asp-action="Index">Defensas</a></li>
                         <li class="nav-item"><a class="@Activa("Reportes")" asp-controller="Reportes" asp-action="Index">Reportes</a></li>
                         <li class="nav-item"><a class="@Activa("Avisos")" asp-controller="Avisos" asp-action="Index">Avisos</a></li>
-                    }
-                    @if (User.IsInRole("Superadministrador"))
-                    {
-                        <li class="nav-item"><a class="@Activa("Ajustes")" asp-controller="Ajustes" asp-action="Index">Ajustes</a></li>
+                        <li class="nav-item"><a class="@Activa("Ajustes")" asp-controller="Ajustes" asp-action="Index">@(User.IsInRole("Superadministrador") ? "Ajustes" : "Bitácora")</a></li>
                     }
                     @if (User.IsInRole("Afiliado"))
                     {
