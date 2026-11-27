@@ -12,9 +12,8 @@ public class AfiliadoSolicitud
     [StringLength(120, ErrorMessage = "El nombre tiene como máximo 120 caracteres.")]
     public string Nombre { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "El carnet es obligatorio.")]
     [StringLength(20, ErrorMessage = "El carnet tiene como máximo 20 caracteres.")]
-    public string Carnet { get; set; } = string.Empty;
+    public string? Carnet { get; set; }
 
     [Required(ErrorMessage = "La fecha de afiliación es obligatoria.")]
     public DateOnly? FechaAfiliacion { get; set; }
@@ -34,9 +33,8 @@ public class ActualizarAfiliadoSolicitud
     [StringLength(120, ErrorMessage = "El nombre tiene como máximo 120 caracteres.")]
     public string Nombre { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "El carnet es obligatorio.")]
     [StringLength(20, ErrorMessage = "El carnet tiene como máximo 20 caracteres.")]
-    public string Carnet { get; set; } = string.Empty;
+    public string? Carnet { get; set; }
 
     [Required(ErrorMessage = "La fecha de afiliación es obligatoria.")]
     public DateOnly? FechaAfiliacion { get; set; }

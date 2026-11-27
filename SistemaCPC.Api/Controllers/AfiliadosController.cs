@@ -102,7 +102,10 @@ public class AfiliadosController : ControllerBase
 
         var afiliado = new Afiliado
         {
-            Registro = registro, Rol = Rol.Afiliado, Nombre = solicitud.Nombre.Trim(), Carnet = solicitud.Carnet.Trim(),
+            Registro = registro,
+            Rol = Rol.Afiliado,
+            Nombre = solicitud.Nombre.Trim(),
+            Carnet = (solicitud.Carnet ?? string.Empty).Trim(),
             FechaAfiliacion = solicitud.FechaAfiliacion.Value, FechaInicioCobro = solicitud.FechaInicioCobro.Value,
             EsTribunal = solicitud.EsTribunal
         };
@@ -121,13 +124,6 @@ public class AfiliadosController : ControllerBase
     [ProducesResponseType<ErrorRespuesta>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AfiliadoRespuesta>> Actualizar(string registro, ActualizarAfiliadoSolicitud solicitud)
     {
-        var error = ValidarFechas(solicitud.FechaAfiliacion!.Value, solicitud.FechaInicioCobro!.Value);
-
-        if (error != null)
-        {
-            return BadRequest(new ErrorRespuesta(error));
-        }
-
         var afiliado = await ConDatosDeCuenta().FirstOrDefaultAsync(a => a.Registro == registro);
 
         if (afiliado == null)
@@ -135,10 +131,20 @@ public class AfiliadosController : ControllerBase
             return NotFound(new ErrorRespuesta("No existe un afiliado con ese registro."));
         }
 
+        if (afiliado.FechaAfiliacion != solicitud.FechaAfiliacion || afiliado.FechaInicioCobro != solicitud.FechaInicioCobro)
+        {
+            var error = ValidarFechas(solicitud.FechaAfiliacion!.Value, solicitud.FechaInicioCobro!.Value);
+
+            if (error != null)
+            {
+                return BadRequest(new ErrorRespuesta(error));
+            }
+        }
+
         afiliado.Nombre = solicitud.Nombre.Trim();
-        afiliado.Carnet = solicitud.Carnet.Trim();
-        afiliado.FechaAfiliacion = solicitud.FechaAfiliacion.Value;
-        afiliado.FechaInicioCobro = solicitud.FechaInicioCobro.Value;
+        afiliado.Carnet = (solicitud.Carnet ?? string.Empty).Trim();
+        afiliado.FechaAfiliacion = solicitud.FechaAfiliacion!.Value;
+        afiliado.FechaInicioCobro = solicitud.FechaInicioCobro!.Value;
         afiliado.EsTribunal = solicitud.EsTribunal;
 
         if (!string.IsNullOrEmpty(solicitud.Contrasena))
@@ -274,7 +280,8 @@ public class AfiliadosController : ControllerBase
             return "La fecha de afiliación no puede ser posterior a hoy.";
         }
 
-        return inicioCobro < afiliacion ? "El inicio de cobro no puede ser anterior a la fecha de afiliación." : null;
+        var mesDeAfiliacion = new DateOnly(afiliacion.Year, afiliacion.Month, 1);
+        return inicioCobro < mesDeAfiliacion ? "El inicio de cobro no puede ser anterior a la fecha de afiliación." : null;
     }
 
     private IQueryable<Afiliado> ConDatosDeCuenta() =>
